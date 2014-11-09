@@ -1,0 +1,142 @@
+#!/bin/sh
+#
+# Init file for Raid Monitor Agent
+# chkconfig: 2345 55 25
+# description:  Raid Monitor Agent
+#
+### BEGIN INIT INFO'
+# Provides: EventMonitor 
+# Required-Start: $local_fs $syslog
+# X-UnitedLinux-Should-Start:
+# Required-Stop: $local_fs $syslog
+# X-UnitedLinux-Should-Stop:'
+# Default-Start: 2 3 5 
+# Default-Stop:  0 1 4 6
+# Short-Description: Raid Monitor 
+# Description: Raid Monitor Agent
+### END INIT INFO'
+
+PATH=$PATH:/usr/Adaptec_Event_Monitor
+export PATH
+export LD_LIBRARY_PATH=$PATH
+RAIDMONITOR_BIN=/usr/Adaptec_Event_Monitor 
+RAIDMONITOR=/usr/Adaptec_Event_Monitor/EventMonitor
+RAIDMONITORD=EventMonitor
+RAIDMONITOR_PID="/var/run/eventmonitor.pid"
+
+# Signal Variables
+SIGTERM=15
+SIGKILL=9
+
+###############################################################
+checkStatusNow()
+{
+	local pid
+	pid=`pidof -s ${RAIDMONITOR}`
+
+        if [ -n "$pid" ]; then
+                echo "$pid" > "${RAIDMONITOR_PID}"
+	        echo "Adaptec Event Monitor has been started successfully (pid $pid)"
+		exit 0
+        else
+                rm "${RAIDMONITOR_PID}"
+                echo "Adaptec Event Monitor could not be started"
+		exit 1
+        fi
+}
+###############################################################
+status() 
+{
+	local pid
+	pid=`pidof -s ${RAIDMONITOR}`
+
+        if [ -n "$pid" ]; then
+	        echo "Adaptec Event Monitor (pid $pid) is running..."
+		PID=$pid
+        else
+                echo "Adaptec Event Monitor is not running/stopped..."
+		PID=0
+        fi
+}
+###############################################################
+start()
+{
+	status
+
+	if [ $PID -eq 0 ]
+	then
+		echo "Starting Adaptec Event Monitor"
+		${RAIDMONITORD}
+		sleep 2
+		checkStatusNow
+	else
+		exit 1
+	fi
+}
+###############################################################
+stop()
+{
+	status
+
+        if [ $PID -ne 0 ]
+        then
+		echo "Stopping Adaptec Event Monitor ($PID)"
+                kill -s $SIGTERM $PID 1>/dev/null 2>&1
+		sleep 5
+                kill -s $SIGKILL $PID 1>/dev/null 2>&1
+                sleep 1
+		exit 0
+	else
+		exit 1
+        fi
+
+}
+###############################################################
+restart()
+{
+        local stat
+
+        status 
+                                                                                                                                                             
+        if [ $PID -ne 0 ]
+        then
+		echo "Stopping Adaptec Event Monitor"
+                kill -s $SIGTERM $PID 1>/dev/null 2>&1
+                sleep 5
+                kill -s $SIGKILL $PID 1>/dev/null 2>&1
+                sleep 1
+        fi
+
+	echo "Starting Adaptec Event Monitor"
+        $RAIDMONITORD
+	sleep 2
+	checkStatusNow
+}
+###############################################################
+PID=0
+
+if test -x $RAIDMONITOR_BIN/EventMonitor 
+then
+	case $1 in
+		start)
+			start
+		;;
+		stop) 
+			stop
+		;;
+		restart)
+			restart
+		;;
+		status)
+			status
+			exit 0
+		;;	
+		*)
+			echo "usage: $0 start|stop|restart|status"
+		;;
+
+	esac
+else
+    echo "$RAIDMONITOR_BIN/EventMonitor not executable"
+fi
+
