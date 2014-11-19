@@ -26,7 +26,7 @@ else
 
 fi
 
-if [[ -n "${3}" && "${3}" == "--disable-pigz" ]]; then
+if [[ "${3}" == "--disable-pigz" ]]; then
 
   echo "Disabling compression of output files."
   ENABLE_PIGS=0
@@ -66,7 +66,7 @@ hostname="$(hostname)"
 #
 # current date
 #
-now="$(date +"%Y-%d-%m")"
+now="$(date +"%Y%d%m-%H%M")"
 
 #
 # directory path for backups
@@ -146,7 +146,7 @@ for db in $dbs; do
 
     else
 
-      $filepath="${filepath}.gz"
+      filepath="${filepath}.gz"
       $mysqldump --single-transaction --tz-utc -u"${db_user}" -h"${db_host}" -p"${db_pass}" "${db}" 2> /dev/null | $gzip $gzipopts > $filepath
 
     fi
