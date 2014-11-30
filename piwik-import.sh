@@ -4,7 +4,6 @@
 ## Scribe Inc
 ## Piwik log import wrapper script
 ##
-## @version   v0.1.0
 ## @author    Rob Frawley 2nd
 ## @copyright 2014 Scribe Inc.
 ## @license   MIT

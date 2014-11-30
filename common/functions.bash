@@ -39,7 +39,7 @@ function out_error
     #
     # Output message
     #
-    echo -en "${OUT_PRE}\n${OUT_PRE} ERROR\n${OUT_PRE}\n"
+    echo -en "${OUT_PRE}\n${OUT_PRE}Critical Error:\n${OUT_PRE}\n"
     out_lines "${@}"
     echo -en "${OUT_PRE}\n\n"
 
@@ -66,8 +66,9 @@ function out_notice
     #
     # Output message
     #
+    echo -en "${OUT_PRE}\n${OUT_PRE}Notice:\n${OUT_PRE}\n"
     out_lines "${@}"
-    echo -en "\n"
+    echo -en "${OUT_PRE}\n\n"
 
     #
     # Reset window color
@@ -243,15 +244,15 @@ check_bins_and_setup_abs_path_vars tput
 
 ## Set name of script
 SELF_FILENAME="$(basename ${0})"
+SELF_SCRIPT_NAME="${SELF_FILENAME}"
 
 ## Set welcome message info
 SELF_AUTHOR_NAME="Rob Frawley 2nd"
 SELF_AUTHOR_EMAIL="rmf@scribe.tools"
 SELF_COPYRIGHT="Scribe Inc."
 SELF_LICENSE="MIT License"
-SELF_SCRIPT_NAME="${SELF_FILENAME}"
 
 ## Output function configuration
-OUT_PRE="## "
+OUT_PRE="# "
 
 ## EOF
