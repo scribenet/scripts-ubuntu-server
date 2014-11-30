@@ -72,12 +72,13 @@ check_bins_and_setup_abs_path_vars pwck grpck
 
 ## Check passwd/shadow file using pwck
 out_lines \
-    "Checking passwd file" \
-    "\n"
+    "Checking passwd file"
+
+out_empty_lines
 
 ${bin_pwck} ${command_opt} -r
 
-out_lines "\n"
+out_empty_lines
 
 if [[ $? -gt 0 ]]; then
     out_notice \
@@ -88,12 +89,13 @@ fi
 
 ## Check group/gshadow file using grpck
 out_lines \
-    "Checking group/gshadow file" \
-    "\n"
+    "Checking group/gshadow file"
+
+out_empty_lines
 
 ${bin_grpck} ${command_opt} -r
 
-out_lines "\n"
+out_empty_lines
 
 if [[ $? -gt 0 ]]; then
     out_notice \
@@ -104,8 +106,9 @@ fi
 
 ## All done
 out_lines \
-    "Checkings completed." \
-    "\n"
+    "Checkings completed."
+
+out_empty_lines
 
 ## Exit
 exit 0

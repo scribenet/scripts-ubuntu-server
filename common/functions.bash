@@ -11,6 +11,12 @@
 ## Output functions
 ##
 
+## Output empty line
+function out_empty_lines
+{
+    echo -en "\n"
+}
+
 ## Output passed arguments as lines
 function out_lines
 {
