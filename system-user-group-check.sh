@@ -106,7 +106,7 @@ fi
 
 ## All done
 out_lines \
-    "Checkings completed."
+    "Checks completed."
 
 out_empty_lines
 
