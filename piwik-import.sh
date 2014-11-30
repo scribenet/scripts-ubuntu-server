@@ -31,18 +31,26 @@ run_with_ionice_at=3
 ## Execution time limits
 loop_max_seconds=3600
 
+## Where are we?
+SELF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+##
+## Include common functions
+##
+source ${SELF_DIR}/common/common.bash
+
 ##
 ## Function definitions
 ##
 
 ## Display script usage and exit
-function out_usage
+function out_usage_custom
 {
     #
     # Display script usage message
     #
     echo -en \
-        "\nUsage:\n\t${0} site_id server_log [piwik_url]\n" \
+        "\nUsage:\n\t${SELF_FILENAME} site_id server_log [piwik_url]\n\n" \
         "\tsite_id\n" \
         "\t\tYou must provide a Piwik site ID which is passed to the import script and\n" \
         "\t\tdetermines what website your log file will apply to.\n" \
@@ -52,42 +60,12 @@ function out_usage
         "\t\tYou may optionally overwrite the Piwik URL defined within this file. It is\n" \
         "\t\tpassed to the import script and is how the new log data is entered.\n" \
         "\n"
-
-    #
-    # Exit with non-zero return
-    #
-    exit 2
 }
 
-## Output passed arguments as lines
-function out_lines
-{
-    #
-    # For each line provided...
-    #
-    for line in "${@}"; do
-
-        #
-        # Output line with our formatting
-        #
-        echo -en "# ${line}\n"
-
-    done
-}
 
 ## Display welcome message
-function out_welcome
+function out_welcome_custom
 {
-    #
-    # Set window text color
-    #
-    tput bold
-    tput setaf 7
-
-    #
-    # Output message
-    #
-    echo -en "\n##\n#\n"
     out_lines \
         "Piwik Log Import Script" \
         "" \
@@ -99,115 +77,7 @@ function out_welcome
         "gets a zero return value from the Piwik import script OR the configured time" \
         "limit is reached (which should not happen, but has been added as a precausion" \
         "in the event that the script never succeeds, results in this bash wrapper script" \
-        "in an unlimited while loop." \
-        "" \
-        "Author    : Rob Frawley 2nd <rmf@scribe.tools>" \
-        "Copyright : 2014 Scribe Inc." \
-        "License   : MIT License (2-clause)"
-    echo -en "#\n##\n\n"
-
-    #
-    # Reset window color
-    #
-    tput sgr0
-}
-
-## Display error message and exit
-function out_error
-{
-    #
-    # Set window text color
-    #
-    tput bold
-    tput setaf 1
-
-    #
-    # Output message
-    #
-    echo -en "#\n# ERROR\n#\n"
-    out_lines "${@}"
-    echo -en "#\n\n"
-
-    #
-    # Reset window color
-    #
-    tput sgr0
-
-    #
-    # Exit script on error with non-zero return
-    #
-    exit 1
-}
-
-## Display notice/warning message
-function out_notice
-{
-    #
-    # Set window text color
-    #
-    tput bold
-    tput setaf 3
-
-    #
-    # Output message
-    #
-    out_lines "${@}"
-    echo -en "\n"
-
-    #
-    # Reset window color
-    #
-    tput sgr0
-}
-
-## Display info messages
-function out_info
-{
-    #
-    # Set window text color
-    #
-    tput setaf 7
-
-    #
-    # Output message
-    #
-    out_lines "${@}"
-    echo -en "\n"
-
-    #
-    # Reset window color
-    #
-    tput sgr0
-}
-
-## Check for required binaries
-function setup_required_bin_paths_and_vars
-{
-    #
-    # For each binary name passed
-    #
-    for bin in "${@}"; do
-
-        #
-        # Attempt to find the binary path and create a variable that holds it
-        #
-        eval "bin_${bin}=$(which ${bin})"
-
-        #
-        # Check to make sure we were able to find the bin path
-        #
-        if [[ -z "$bin_${bin}" ]]; then
-
-            #
-            # Output error if bin path could not be found
-            #
-            out_error \
-                "Could not find '${bin}' command but it is required." \
-                "Please install it on your system or ensure it is within your PATH."
-
-        fi
-
-    done
+        "in an unlimited while loop."
 }
 
 ## Get pre commands (for ionice and/or nice)
@@ -226,7 +96,7 @@ function get_command_pre
         #
         # Get full path to ionice
         #
-        setup_required_bin_paths_and_vars "ionice"
+        check_bins_and_setup_abs_path_vars "ionice"
 
         #
         # Add it to pre_command
@@ -243,7 +113,7 @@ function get_command_pre
         #
         # Get full path to nice
         #
-        setup_required_bin_paths_and_vars "nice"
+        check_bins_and_setup_abs_path_vars "nice"
 
         #
         # Add it to pre_command
@@ -356,7 +226,7 @@ fi
 ##
 ## Pre-flight checks
 ##
-setup_required_bin_paths_and_vars "php" "python" "grep" "head" "tr" "tail" "date"
+check_bins_and_setup_abs_path_vars "php" "python" "grep" "head" "tr" "tail" "date"
 
 ##
 ## Setup runtime variables
