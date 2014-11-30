@@ -221,7 +221,7 @@ function check_bins_and_setup_abs_path_vars
         #
         # Check to make sure we were able to find the bin path
         #
-        if [[ -z "$bin_${bin}" ]]; then
+        if [[ -z "$(which ${bin})" ]]; then
 
             #
             # Output error if bin path could not be found
