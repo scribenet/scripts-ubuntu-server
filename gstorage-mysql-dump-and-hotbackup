@@ -20,12 +20,15 @@ SELF_SCRIPT_NAME="Google Storage - MySQL Dump/Backups"
 GSUTIL_BUCKET_BASE="gs://scribe-systems-boe-mysql/"
 GSUTIL_CP_OPT="-m cp -c -r "
 NOW="$(date +%s)"
-MYSQL_DUMP_DIR="/tmp/mysql-dump/${NOW}"
+BASE_DIR="/tmp/gstorage-mysql-dump-and-hotbackup/"
+MYSQL_DUMP_DIR_BASE="${BASE_DIR}dump/"
+MYSQL_DUMP_DIR="${MYSQL_DUMP_DIR_BASE}${NOW}"
 MYSQL_DUMP_CMD="${SELF_DIR}/mysql-db-backup.sh"
-MYSQL_DUMP_BUCKET="${GSUTIL_REMOTE_URL_BASE}dumps/"
-MYSQL_BACKUP_DIR="/tmp/mysql-backup/${NOW}"
+MYSQL_DUMP_BUCKET="${GSUTIL_BUCKET_BASE}dumps/"
+MYSQL_BACKUP_DIR_BASE="${BASE_DIR}backup/"
+MYSQL_BACKUP_DIR="${MYSQL_BACKUP_DIR_BASE}${NOW}"
 MYSQL_BACKUP_OPT="--no-timestamp"
-MYSQL_BACKUP_BUCKET="${GSUTIL_REMOTE_URL_BASE}backup/"
+MYSQL_BACKUP_BUCKET="${GSUTIL_BUCKET_BASE}backup/"
 
 export BOTO_CONFIG=/opt/gsutil/.boto
 
@@ -118,7 +121,9 @@ out_info \
     "  -> ${MYSQL_DUMP_DIR}" \
     "" \
     "MySQL Databae dumps:" \
-    "  -> Starting"
+    "  Status  -> Starting" \
+    "  Command -> mkdir -p \"${MYSQL_DUMP_DIR}\" && cd \"${MYSQL_DUMP_DIR}\"" \
+    "  Command -> ${MYSQL_DUMP_CMD} \"${MYSQL_DUMP_USER}\" \"${MYSQL_DUMP_PASS}\""
 
 mkdir -p "${MYSQL_DUMP_DIR}" && cd "${MYSQL_DUMP_DIR}"
 ${MYSQL_DUMP_CMD} "${MYSQL_DUMP_USER}" "${MYSQL_DUMP_PASS}"
@@ -133,11 +138,13 @@ out_notice_no_header \
 
 out_info \
     "MySQL Databae dumps upload to Google Cloud Storage:" \
-    "  -> Starting"
+    "  Status  -> Starting" \
+    "  Command -> cd \"${MYSQL_DUMP_DIR_BASE}\"" \
+    "  Command -> ${bin_gsutil} ${GSUTIL_CP_OPT} \"./${NOW}/\" \"${MYSQL_DUMP_BUCKET}\""
 
-cd ..
+cd "${MYSQL_DUMP_DIR_BASE}"
 ${bin_gsutil} ${GSUTIL_CP_OPT} "./${NOW}/" "${MYSQL_DUMP_BUCKET}"
-${bin_rm} -fr ${MYSQL_DUMP_DIR}
+#${bin_rm} -fr ${MYSQL_DUMP_DIR}
 
 out_success \
     "MySQL Databae dumps upload to Google Cloud Storage:" \
@@ -148,13 +155,12 @@ out_notice_no_header \
     "  [3/4] -> MySQL InnoDB Hot-Backup"
 
 out_info \
-    "Creating temporary directory for backup:" \
-    "  -> ${MYSQL_BACKUP_DIR}" \
-    "" \
     "MySQL Databae InnoDB Hot-Backup using innodbackupex:" \
-    "  -> Starting"
+    "  Status  -> Starting" \
+    "  Command -> mkdir -p \"${MYSQL_BACKUP_DIR_BASE}\" && cd \"${MYSQL_BACKUP_DIR_BASE}\"" \
+    "  Command -> ${bin_innobackupex} --user=\"${MYSQL_BACKUP_USER}\" --password=\"${MYSQL_BACKUP_PASS}\" \"${MYSQL_BACKUP_DIR}\" ${MYSQL_BACKUP_OPT}"
 
-mkdir -p "${MYSQL_BACKUP_DIR}" && cd "${MYSQL_BACKUP_DIR}"
+mkdir -p "${MYSQL_BACKUP_DIR_BASE}" && cd "${MYSQL_BACKUP_DIR_BASE}"
 ${bin_innobackupex} --user="${MYSQL_BACKUP_USER}" --password="${MYSQL_BACKUP_PASS}" "${MYSQL_BACKUP_DIR}" ${MYSQL_BACKUP_OPT}
 
 out_success \
@@ -167,17 +173,19 @@ out_notice_no_header \
 
 out_info \
     "MySQL Databae dumps upload to Google Cloud Storage:" \
-    "  -> Starting"
+    "  Status  -> Starting" \
+    "  Command -> cd \"${MYSQL_BACKUP_DIR_BASE}\"" \
+    "  Command -> ${bin_gsutil} ${GSUTIL_CP_OPT} \"./${NOW}/\" \"${MYSQL_BACKUP_BUCKET}\""
 
-cd ..
+cd "${MYSQL_BACKUP_DIR_BASE}"
 ${bin_gsutil} ${GSUTIL_CP_OPT} "./${NOW}/" "${MYSQL_BACKUP_BUCKET}"
-${bin_rm} -fr ${MYSQL_DUMP_DIR}
+#${bin_rm} -fr ${MYSQL_BACKUP_DIR}
 
 out_success \
     "MySQL Databae dumps upload to Google Cloud Storage:" \
     "  -> Completed"
 
-out_success "All operations completed successfully!"
+out_success "All operations completed."
 
 ## Exit
 exit 0
