@@ -94,7 +94,7 @@ function out_notice_no_header
     #
     # Output message
     #
-    echo -en "${OUT_PRE}\n${OUT_PRE}\n"
+    echo -en "${OUT_PRE}\n"
     out_lines "${@}"
     echo -en "${OUT_PRE}\n\n"
 
@@ -118,6 +118,59 @@ function out_info
     #
     out_lines "${@}"
     echo -en "\n"
+
+    #
+    # Reset window color
+    #
+    $bin_tput sgr0
+}
+
+## Display info messages
+function out_stage
+{
+    #
+    # Set window text color
+    #
+    $bin_tput setaf 5
+
+    #
+    # Output message
+    #
+    echo -en "${OUT_PRE}\n"
+    out_lines "$(${bin_tput} bold)$(echo "Entering stage:" | tr '[:lower:]' '[:upper:]')$(${bin_tput} sgr0; ${bin_tput} setaf 5) ${3}"
+    out_lines "  Step -> [$(${bin_tput} bold)${1}$(${bin_tput} sgr0; ${bin_tput} setaf 5)/${2}]"
+    echo -en "${OUT_PRE}\n\n"
+
+    #
+    # Reset window color
+    #
+    $bin_tput sgr0
+}
+
+## Display info messages
+function out_commands
+{
+    #
+    # Local command count
+    #
+    local cmd_i=1
+    local cmd_i_pad=$(echo "($# - 1) / 10" | bc)
+
+    #
+    # Set window text color
+    #
+    $bin_tput setaf 3
+
+    #
+    # Output message
+    #
+    echo -en "${OUT_PRE}\n"
+    out_lines "$(${bin_tput} bold)$(echo "Executing commands:" | tr '[:lower:]' '[:upper:]')$(${bin_tput} sgr0; ${bin_tput} setaf 3) ${1}"
+    for command in "${@:2}"; do
+        out_lines "  Command [$(printf %0${cmd_i_pad}d ${cmd_i})] -> ${command}"
+        cmd_i=$((cmd_i + 1))
+    done
+    echo -en "${OUT_PRE}\n\n"
 
     #
     # Reset window color
@@ -196,6 +249,7 @@ function out_welcome
     #
     # Set window text color
     #
+    $bin_tput bold
     $bin_tput setaf 7
 
     #

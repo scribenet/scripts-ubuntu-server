@@ -87,6 +87,13 @@ else
 
 fi
 
+##
+## Require root
+##
+if [[ $EUID -ne 0 ]]; then
+    out_empty_lines && out_error "This script must be run as root. Try sudo."
+fi
+
 ## Welcome message
 out_welcome
 
@@ -112,75 +119,70 @@ out_info \
     "  MYSQL_BACKUP_PASS   -> ${MYSQL_BACKUP_PASS}" \
     "  MYSQL_BACKUP_BUCKET -> ${MYSQL_BACKUP_BUCKET}" \
 
-out_notice_no_header \
-    "Entering stage:" \
-    "  [1/4] -> MySQL Dumps"
+out_stage \
+    "1" \
+    "4" \
+    "MySQL Dumps"
 
-out_info \
-    "MySQL Databae dumps:" \
-    "  Status  -> Starting" \
-    "  Command -> mkdir -p \"${MYSQL_DUMP_DIR}\" && cd \"${MYSQL_DUMP_DIR}\"" \
-    "  Command -> ${MYSQL_DUMP_CMD} \"${MYSQL_DUMP_USER}\" \"${MYSQL_DUMP_PASS}\""
+out_commands \
+    "Executing MySQL Dumps" \
+    "mkdir -p "${MYSQL_DUMP_DIR}"" \
+    "cd "${MYSQL_DUMP_DIR}"" \
+    "${MYSQL_DUMP_CMD} "${MYSQL_DUMP_USER}" "${MYSQL_DUMP_PASS}""
 
 mkdir -p "${MYSQL_DUMP_DIR}" && cd "${MYSQL_DUMP_DIR}"
 ${MYSQL_DUMP_CMD} "${MYSQL_DUMP_USER}" "${MYSQL_DUMP_PASS}"
 
-out_success \
-    "MySQL Databae dumps:" \
-    "  -> Completed"
+out_empty_lines && out_success "MySQL Dump: Complete"
 
-out_notice_no_header \
-    "Entering stage:" \
-    "  [2/4] -> MySQL Dumps Upload"
+out_stage \
+    "2" \
+    "4" \
+    "Upload MySQL Dumps"
 
-out_info \
-    "MySQL Databae dumps upload to Google Cloud Storage:" \
-    "  Status  -> Starting" \
-    "  Command -> cd \"${MYSQL_DUMP_DIR_BASE}\"" \
-    "  Command -> ${bin_gsutil} ${GSUTIL_CP_OPT} \"./${NOW}/\" \"${MYSQL_DUMP_BUCKET}\""
+out_commands \
+    "Uploading MySQL Dumps" \
+    "cd \"${MYSQL_DUMP_DIR_BASE}\"" \
+    "${bin_gsutil} ${GSUTIL_CP_OPT} \"./${NOW}/\" \"${MYSQL_DUMP_BUCKET}\"" \
+    "${bin_rm} -fr ${MYSQL_DUMP_DIR}"
 
 cd "${MYSQL_DUMP_DIR_BASE}"
 ${bin_gsutil} ${GSUTIL_CP_OPT} "./${NOW}/" "${MYSQL_DUMP_BUCKET}"
-#${bin_rm} -fr ${MYSQL_DUMP_DIR}
+${bin_rm} -fr ${MYSQL_DUMP_DIR}
 
-out_success \
-    "MySQL Databae dumps upload to Google Cloud Storage:" \
-    "  -> Completed"
+out_empty_lines && out_success "Upload MySQL Dump: Complete"
 
-out_notice_no_header \
-    "Entering stage:" \
-    "  [3/4] -> MySQL InnoDB Hot-Backup"
+out_stage \
+    "3" \
+    "4" \
+    "MySQL InnoDB Hot-Backup"
 
-out_info \
-    "MySQL Databae InnoDB Hot-Backup using innodbackupex:" \
-    "  Status  -> Starting" \
-    "  Command -> mkdir -p \"${MYSQL_BACKUP_DIR_BASE}\" && cd \"${MYSQL_BACKUP_DIR_BASE}\"" \
-    "  Command -> ${bin_innobackupex} --user=\"${MYSQL_BACKUP_USER}\" --password=\"${MYSQL_BACKUP_PASS}\" \"${MYSQL_BACKUP_DIR}\" ${MYSQL_BACKUP_OPT}"
+out_commands \
+    "Executing MySQL InnoDB Hot-Backup" \
+    "mkdir -p \"${MYSQL_BACKUP_DIR_BASE}\" && cd \"${MYSQL_BACKUP_DIR_BASE}\"" \
+    "${bin_innobackupex} --user=\"${MYSQL_BACKUP_USER}\" --password=\"${MYSQL_BACKUP_PASS}\" \"${MYSQL_BACKUP_DIR}\" ${MYSQL_BACKUP_OPT}"
 
 mkdir -p "${MYSQL_BACKUP_DIR_BASE}" && cd "${MYSQL_BACKUP_DIR_BASE}"
 ${bin_innobackupex} --user="${MYSQL_BACKUP_USER}" --password="${MYSQL_BACKUP_PASS}" "${MYSQL_BACKUP_DIR}" ${MYSQL_BACKUP_OPT}
 
-out_success \
-    "MySQL Databae InnoDB Hot-Backup using innodbackupex:" \
-    "  -> Completed"
+out_empty_lines && out_success "MySQL InnoDB Hot-Backup: Complete"
 
-out_notice_no_header \
-    "Entering stage:" \
-    "  [4/4] -> MySQL InnoDB Hot-Backup Upload"
+out_stage \
+    "4" \
+    "4" \
+    "Upload MySQL InnoDB Hot-Backup"
 
-out_info \
-    "MySQL Databae dumps upload to Google Cloud Storage:" \
-    "  Status  -> Starting" \
-    "  Command -> cd \"${MYSQL_BACKUP_DIR_BASE}\"" \
-    "  Command -> ${bin_gsutil} ${GSUTIL_CP_OPT} \"./${NOW}/\" \"${MYSQL_BACKUP_BUCKET}\""
+out_commands \
+    "Uploading MySQL InnoDB Hot-Backup" \
+    "mkdir -p cd \"${MYSQL_BACKUP_DIR_BASE}\"" \
+    "${bin_gsutil} ${GSUTIL_CP_OPT} \"./${NOW}/\" \"${MYSQL_BACKUP_BUCKET}\"" \
+    "${bin_rm} -fr ${MYSQL_BACKUP_DIR}"
 
 cd "${MYSQL_BACKUP_DIR_BASE}"
 ${bin_gsutil} ${GSUTIL_CP_OPT} "./${NOW}/" "${MYSQL_BACKUP_BUCKET}"
-#${bin_rm} -fr ${MYSQL_BACKUP_DIR}
+${bin_rm} -fr ${MYSQL_BACKUP_DIR}
 
-out_success \
-    "MySQL Databae dumps upload to Google Cloud Storage:" \
-    "  -> Completed"
+out_empty_lines && out_success "Upload MySQL InnoDB Hot-Backup: Complete"
 
 out_success "All operations completed."
 
