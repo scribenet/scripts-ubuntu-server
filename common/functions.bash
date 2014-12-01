@@ -82,13 +82,57 @@ function out_notice
     $bin_tput sgr0
 }
 
+## Display notice/warning message
+function out_notice_no_header
+{
+    #
+    # Set window text color
+    #
+    $bin_tput bold
+    $bin_tput setaf 3
+
+    #
+    # Output message
+    #
+    echo -en "${OUT_PRE}\n${OUT_PRE}\n"
+    out_lines "${@}"
+    echo -en "${OUT_PRE}\n\n"
+
+    #
+    # Reset window color
+    #
+    $bin_tput sgr0
+}
+
 ## Display info messages
 function out_info
 {
     #
     # Set window text color
     #
-    $bin_tput setaf 7
+    $bin_tput bold
+    $bin_tput setaf 4
+
+    #
+    # Output message
+    #
+    out_lines "${@}"
+    echo -en "\n"
+
+    #
+    # Reset window color
+    #
+    $bin_tput sgr0
+}
+
+## Display success messages
+function out_success
+{
+    #
+    # Set window text color
+    #
+    $bin_tput bold
+    $bin_tput setaf 2
 
     #
     # Output message

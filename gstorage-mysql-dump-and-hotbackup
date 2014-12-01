@@ -1,0 +1,185 @@
+#!/bin/bash
+
+##
+## Scribe Inc
+## Backup MySQL databases and upload to Google Cloud Storage
+##
+
+## Where are we?
+SELF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+##
+## Include common functions
+##
+source ${SELF_DIR}/common/common.bash
+
+##
+## Configuration
+##
+SELF_SCRIPT_NAME="Google Storage - MySQL Dump/Backups"
+GSUTIL_BUCKET_BASE="gs://scribe-systems-boe-mysql/"
+GSUTIL_CP_OPT="-m cp -c -r "
+NOW="$(date +%s)"
+MYSQL_DUMP_DIR="/tmp/mysql-dump/${NOW}"
+MYSQL_DUMP_CMD="${SELF_DIR}/mysql-db-backup.sh"
+MYSQL_DUMP_BUCKET="${GSUTIL_REMOTE_URL_BASE}dumps/"
+MYSQL_BACKUP_DIR="/tmp/mysql-backup/${NOW}"
+MYSQL_BACKUP_OPT="--no-timestamp"
+MYSQL_BACKUP_BUCKET="${GSUTIL_REMOTE_URL_BASE}backup/"
+
+export BOTO_CONFIG=/opt/gsutil/.boto
+
+##
+## Function definitions
+##
+
+## Display welcome message
+function out_welcome_custom
+{
+    out_lines \
+        "${SELF_SCRIPT_NAME}" \
+        "" \
+        "This script handles dumping the MySQL database files and uploading them to" \
+        "out Google Cloud Storage bucket."
+}
+
+## Display script usage and exit
+function out_usage_custom
+{
+    #
+    # Display script usage message
+    #
+    echo -en \
+        "\nUsage:\n\t${SELF_FILENAME} mysql_dump_user mysql_dump_pass mysql_backup_user mysql_backup_pass\n\n" \
+        "\tmysql_dump_user\n" \
+        "\t\tUser name with privlages to dump a database\n" \
+        "\n\tmysql_dump_pass\n" \
+        "\t\tUser password with privlages to dump a database.\n" \
+        "\n\tmysql_backup_user\n" \
+        "\t\tUser name with full permissions on server (for percona hot-backup)\n" \
+        "\n\tmysql_backup_pass\n" \
+        "\t\tUser password with full permissions on server (for percona hot-backup)\n" \
+        "\n"
+}
+
+#
+# check for (required) first and second parameters
+#
+if [[ -z "${1}" ]] || [[ -z "${2}" ]] || [[ -z "${3}" ]] || [[ -z "${4}" ]]; then
+
+    #
+    # display usage and exit with non-zero value
+    #
+    out_usage
+
+else
+
+    #
+    # define db user and password
+    #
+    MYSQL_DUMP_USER="${1}"
+    MYSQL_DUMP_PASS="${2}"
+    MYSQL_BACKUP_USER="${3}"
+    MYSQL_BACKUP_PASS="${4}"
+
+fi
+
+## Welcome message
+out_welcome
+
+## Check for require bins
+check_bins_and_setup_abs_path_vars rm gsutil innobackupex
+
+## Configuration file used
+out_info \
+    "Using the following configuration:" \
+    "  BOTO_CONFIG         -> ${BOTO_CONFIG}" \
+    "  GSUTIL_BIN          -> ${bin_gsutil}" \
+    "  GSUTIL_CP_OPT       -> ${GSUTIL_CP_OPT}" \
+    "  GSUTIL_BUCKET_BASE  -> ${GSUTIL_BUCKET_BASE}" \
+    "  MYSQL_DUMP_DIR      -> ${MYSQL_DUMP_DIR}" \
+    "  MYSQL_DUMP_CMD      -> ${MYSQL_DUMP_CMD}" \
+    "  MYSQL_DUMP_USER     -> ${MYSQL_DUMP_USER}" \
+    "  MYSQL_DUMP_PASS     -> ${MYSQL_DUMP_PASS}" \
+    "  MYSQL_DUMP_BUCKET   -> ${MYSQL_DUMP_BUCKET}" \
+    "  MYSQL_BACKUP_DIR    -> ${MYSQL_BACKUP_DIR}" \
+    "  MYSQL_BACKUP_CMD    -> ${bin_innobackupex}" \
+    "  MYSQL_BACKUP_OPT    -> ${MYSQL_BACKUP_OPT}" \
+    "  MYSQL_BACKUP_USER   -> ${MYSQL_BACKUP_USER}" \
+    "  MYSQL_BACKUP_PASS   -> ${MYSQL_BACKUP_PASS}" \
+    "  MYSQL_BACKUP_BUCKET -> ${MYSQL_BACKUP_BUCKET}" \
+
+out_notice_no_header \
+    "Entering stage:" \
+    "  [1/4] -> MySQL Dumps"
+
+out_info \
+    "Creating temporary directory for dump:" \
+    "  -> ${MYSQL_DUMP_DIR}" \
+    "" \
+    "MySQL Databae dumps:" \
+    "  -> Starting"
+
+mkdir -p "${MYSQL_DUMP_DIR}" && cd "${MYSQL_DUMP_DIR}"
+${MYSQL_DUMP_CMD} "${MYSQL_DUMP_USER}" "${MYSQL_DUMP_PASS}"
+
+out_success \
+    "MySQL Databae dumps:" \
+    "  -> Completed"
+
+out_notice_no_header \
+    "Entering stage:" \
+    "  [2/4] -> MySQL Dumps Upload"
+
+out_info \
+    "MySQL Databae dumps upload to Google Cloud Storage:" \
+    "  -> Starting"
+
+cd ..
+${bin_gsutil} ${GSUTIL_CP_OPT} "./${NOW}/" "${MYSQL_DUMP_BUCKET}"
+${bin_rm} -fr ${MYSQL_DUMP_DIR}
+
+out_success \
+    "MySQL Databae dumps upload to Google Cloud Storage:" \
+    "  -> Completed"
+
+out_notice_no_header \
+    "Entering stage:" \
+    "  [3/4] -> MySQL InnoDB Hot-Backup"
+
+out_info \
+    "Creating temporary directory for backup:" \
+    "  -> ${MYSQL_BACKUP_DIR}" \
+    "" \
+    "MySQL Databae InnoDB Hot-Backup using innodbackupex:" \
+    "  -> Starting"
+
+mkdir -p "${MYSQL_BACKUP_DIR}" && cd "${MYSQL_BACKUP_DIR}"
+${bin_innobackupex} --user="${MYSQL_BACKUP_USER}" --password="${MYSQL_BACKUP_PASS}" "${MYSQL_BACKUP_DIR}" ${MYSQL_BACKUP_OPT}
+
+out_success \
+    "MySQL Databae InnoDB Hot-Backup using innodbackupex:" \
+    "  -> Completed"
+
+out_notice_no_header \
+    "Entering stage:" \
+    "  [4/4] -> MySQL InnoDB Hot-Backup Upload"
+
+out_info \
+    "MySQL Databae dumps upload to Google Cloud Storage:" \
+    "  -> Starting"
+
+cd ..
+${bin_gsutil} ${GSUTIL_CP_OPT} "./${NOW}/" "${MYSQL_BACKUP_BUCKET}"
+${bin_rm} -fr ${MYSQL_DUMP_DIR}
+
+out_success \
+    "MySQL Databae dumps upload to Google Cloud Storage:" \
+    "  -> Completed"
+
+out_success "All operations completed successfully!"
+
+## Exit
+exit 0
+
+## EOF
