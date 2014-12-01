@@ -117,9 +117,6 @@ out_notice_no_header \
     "  [1/4] -> MySQL Dumps"
 
 out_info \
-    "Creating temporary directory for dump:" \
-    "  -> ${MYSQL_DUMP_DIR}" \
-    "" \
     "MySQL Databae dumps:" \
     "  Status  -> Starting" \
     "  Command -> mkdir -p \"${MYSQL_DUMP_DIR}\" && cd \"${MYSQL_DUMP_DIR}\"" \
