@@ -53,22 +53,24 @@ function out_usage_custom
     # Display script usage message
     #
     echo -en \
-        "\nUsage:\n\t${SELF_FILENAME} mysql_dump_user mysql_dump_pass mysql_backup_user mysql_backup_pass\n\n" \
+        "\nUsage:\n\t${SELF_FILENAME} mysql_dump_user mysql_dump_pass [mysql_backup_user mysql_backup_pass]\n\n" \
         "\tmysql_dump_user\n" \
-        "\t\tUser name with privlages to dump a database\n" \
+        "\t\tUser name with privlages to dump a database.\n" \
         "\n\tmysql_dump_pass\n" \
         "\t\tUser password with privlages to dump a database.\n" \
         "\n\tmysql_backup_user\n" \
-        "\t\tUser name with full permissions on server (for percona hot-backup)\n" \
+        "\t\tUser name with full permissions on server (for percona hot-backup).\n" \
+        "\t\tDefaults to the value of mysql_dump_user.\n" \
         "\n\tmysql_backup_pass\n" \
-        "\t\tUser password with full permissions on server (for percona hot-backup)\n" \
+        "\t\tUser password with full permissions on server (for percona hot-backup).\n" \
+        "\t\tDefaults to the value of mysql_dump_pass.\n" \
         "\n"
 }
 
 #
 # check for (required) first and second parameters
 #
-if [[ -z "${1}" ]] || [[ -z "${2}" ]] || [[ -z "${3}" ]] || [[ -z "${4}" ]]; then
+if [[ -z "${1}" ]] || [[ -z "${2}" ]]; then
 
     #
     # display usage and exit with non-zero value
@@ -78,12 +80,28 @@ if [[ -z "${1}" ]] || [[ -z "${2}" ]] || [[ -z "${3}" ]] || [[ -z "${4}" ]]; the
 else
 
     #
-    # define db user and password
+    # define dump db user and password
     #
     MYSQL_DUMP_USER="${1}"
     MYSQL_DUMP_PASS="${2}"
-    MYSQL_BACKUP_USER="${3}"
-    MYSQL_BACKUP_PASS="${4}"
+
+    if [[ -z "${3}" ]] || [[ -z "${4}" ]]; then
+
+        #
+        # define percona innodb hot-backup user and password from dump creds
+        #
+        MYSQL_BACKUP_USER="${MYSQL_DUMP_USER}"
+        MYSQL_BACKUP_PASS="${MYSQL_DUMP_PASS}"
+
+    else
+
+        #
+        # define percona innodb hot-backup user and password
+        #
+        MYSQL_BACKUP_USER="${3}"
+        MYSQL_BACKUP_PASS="${4}"
+
+    fi
 
 fi
 
