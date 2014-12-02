@@ -1,0 +1,7 @@
+#!/bin/bash
+
+NOW="$(date +%s)"
+LOG_DIR="/tmp/bonnie_${NOW}"
+
+bonnie++ -d "${1}" -r "${2}" -u "$(whoami)" > "${LOG_DIR}"  2>&1
+cat "${LOG_DIR}" | tail -n 1 | bon_csv2html > "/www/static/rmf/bonnie/boe_$(echo ${1} | tr "/" "-")_${NOW}.html"
