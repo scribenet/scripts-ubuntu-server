@@ -16,6 +16,7 @@ source ${SELF_DIR}/common/common.bash
 ##
 ## Configuration
 ##
+
 SELF_SCRIPT_NAME="Google Storage - MySQL Dump/Backups"
 GSUTIL_BUCKET_BASE="gs://scribe-systems-boe-mysql/"
 GSUTIL_CP_OPT="-m cp -c -r "
