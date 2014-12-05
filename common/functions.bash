@@ -391,9 +391,105 @@ function out_usage
     fi
 
     #
+    # Display error message if one was passed
+    #
+    if [[ "$#" -gt 0 ]]; then
+        out_error_no_header "$@"
+    fi
+
+    #
     # Exit with non-zero return
     #
     exit 2
+}
+
+function out_usage_optls
+{
+    echo -en "\nUsage:\n\t./${SELF_FILENAME}"
+
+    for opt in "$@"; do
+        echo -en " ${opt}"
+    done
+
+    echo -en "\n\n"
+}
+
+function out_usage_optdt {
+    local required=0;
+    local i=0;
+
+    if [[ ${1} -eq 1 ]]; then
+        required=1
+    fi
+
+    echo -en "\t"
+
+    for opt in "${@:2}"; do
+        if [[ ${i} -gt 0 ]]; then
+            echo -en "| "
+        fi
+        echo -en  "${opt} "
+        i=$(( i + 1 ))
+    done
+
+    if [[ ${required} == 0 ]]; then
+        echo -en "[optional]"
+    else
+        echo -en "[required]"
+    fi
+
+    echo -en "\n\n"
+}
+
+function out_usage_optdd
+{
+    local out="${@:1}"
+    out="${out##*( )}"
+
+    while read line; do
+        echo -en "\t\t${line}\n"
+    done <<< "$(echo ${out} | ${bin_fold} -w 80)"
+
+    echo -en "\n"
+}
+
+function out_usage_optdd_p
+{
+    local out="${@:1}"
+    out="${out##*( )}"
+
+    while read line; do
+        echo -en "\t\t${line}\n"
+    done <<< "$(echo ${out} | ${bin_fold} -w 80)"
+
+    echo -en "\n"
+}
+
+function out_usage_optls_start
+{
+    echo -en
+}
+
+function out_usage_optls_end
+{
+    echo -en "\n";
+}
+
+function out_usage_optls_i
+{
+    local i=0
+    local oli=${1}
+    local out="${@:2}"
+    out="${out##*( )}"
+
+    while read line; do
+        if [[ ${i} -eq 0 ]]; then
+            echo -en "\t\t    ${oli}) ${line}\n"
+        else
+            echo -en "\t\t       ${line}\n"
+        fi
+        i=$(( i + 1 ))
+    done <<< "$(echo ${out} | ${bin_fold} -w 73)"
 }
 
 ## Display welcome message
@@ -511,7 +607,7 @@ function check_bins_and_setup_abs_path_vars
 ##
 
 ## Require tputs and setup variable to call it via absolute path
-check_bins_and_setup_abs_path_vars tput
+check_bins_and_setup_abs_path_vars tput fold
 
 ## Out variables
 OUT_PROMPT_RESPONSE=""
