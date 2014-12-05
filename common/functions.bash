@@ -32,14 +32,48 @@ function out_lines
 
     done
 }
-
 ## Continue prompt
-function out_prompt_continue
+function out_prompt_boolean
 {
     #
-    # User response
+    # User response and importance of prompt
     #
     local response=""
+    local importance=0
+    local message="Would you like to continue?"
+    local title=""
+    local default=-1
+
+    #
+    # Check for passed values for the importance, message, title, and default
+    #
+    if [[ $# -gt 0 ]]; then
+
+        if [[ -n ${1} ]] && [[ ${1} -gt 0 ]]; then
+
+            importance=${1}
+
+        fi
+
+        if [[ -n "${2}" ]]; then
+
+            message="${2}"
+
+        fi
+
+        if [[ -n "${3}" ]]; then
+
+            title="${3}"
+
+        fi
+
+        if [[ -n "${4}" ]]; then
+
+            default="${4}"
+
+        fi
+
+    fi
 
     #
     # Continue asking until we get a valid response
@@ -52,16 +86,63 @@ function out_prompt_continue
         $bin_tput setaf 3
 
         #
+        # Begin output
+        #
+        echo -en ">>> "
+
+        #
+        # Title, if available
+        #
+        if [[ -n "${title}" ]]; then
+
+            echo -en "["
+            $bin_tput bold
+            echo -en "$( echo ${title} | tr '[:lower:]' '[:upper:]' )"
+            $bin_tput sgr0
+            $bin_tput setaf 3
+            echo -en "] "
+
+        fi
+
+        #
         # Output message
         #
-        echo -en ">>> Would you like to continue? [y/n]: "
+        echo -en "${message} "
+
+        #
+        # Different behaviour if default is available
+        #
+        echo -en "["
+        if [[ -n "${default}" ]] && [[ "${default}" == "y" ]]; then
+
+            $bin_tput bold
+            echo -en "Y"
+            $bin_tput sgr0
+            $bin_tput setaf 3
+            echo -en "/n"
+
+        elif [[ -n "${default}" ]] && [[ "${default}" == "n" ]]; then
+
+
+            echo -en "y/"
+            $bin_tput bold
+            echo -en "N"
+            $bin_tput sgr0
+            $bin_tput setaf 3
+
+        else
+
+            echo -en "y/n"
+
+        fi
+        echo -en "]: "
 
         #
         # Bold text for user input
         #
         $bin_tput bold
 
-        if [[ -n "${OUT_PROMPT_DEFAULT}" ]]; then
+        if [[ -n "${OUT_PROMPT_DEFAULT}" ]] && [[ ${importance} -lt 1 ]]; then
             echo -en "${OUT_PROMPT_DEFAULT} (non-interactive-mode)"
             response="${OUT_PROMPT_DEFAULT}"
             out_empty_lines
@@ -83,6 +164,9 @@ function out_prompt_continue
         # If user input is valid, break from while loop
         #
         if [[ "${response}" == "y" ]] || [[ "${response}" == "yes" ]] || [[ "${response}" == "n" ]] || [[ "${response}" == "no" ]]; then
+            break
+        elif [[ -n "${default}" ]] && [[ -z "${response}" ]]; then
+            response="${default}"
             break
         else
             out_warning_no_header \
@@ -106,6 +190,12 @@ function out_prompt_continue
     # Set global response var
     #
     OUT_PROMPT_RESPONSE="${response}"
+}
+
+## Continue prompt
+function out_prompt_continue
+{
+    out_prompt_boolean "0" "Would you like to continue?" "" "y"
 }
 
 ## Display error message and exit

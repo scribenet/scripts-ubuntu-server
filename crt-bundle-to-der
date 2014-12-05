@@ -211,7 +211,7 @@ out_info_config \
     "  Output DER Pathname   -> $(if [[ ${PERFORM_STAPLING_FILE_INSTALLATION} -eq 0 ]]; then echo "${TEMP_DIRPATH}"; else echo "${DER_DIRPATH}"; fi)/${DER_BASENAME}.${DER_FILEEXT}"
 
 ## Allow the user to bail
-out_prompt_continue
+out_prompt_boolean "0" "Would you like to continue?" "Confirm Config" "y"
 
 ## Begin step 1
 out_stage \
@@ -296,11 +296,15 @@ for level_filename in level-?.crt; do
             "Step 3.${SSL_CERT_I}: Failed" \
             "  Cert File   -> ${level_filename}" \
             "  Cert Serial -> ${SSL_CERT_SERIAL}" \
-            "  OCSP URL    -> Unknown"
+            "  OCSP URL    -> Unknown" \
+            "" \
+            "It is likely you included the root certificate within the certificate bundle, which you shuld not do." \
+            "While there are many other reasons that this error could occur, if this is the last certificate within" \
+            "your file, it is likely the culpret."
 
         if [[ ${PERFORM_CERTIFICATE_EXTENDED_VERIFY} -eq 1 ]]; then
             ## Allow the user to bail
-            out_prompt_continue
+            out_prompt_boolean "1" "Would you like to continue creating the (likely invalid) DER file?" "Invalid Cert" "n"
         fi
     else
         out_success \
@@ -324,8 +328,8 @@ out_stage \
 SSL_CERT_DER="${DER_BASENAME}.${DER_FILEEXT}"
 
 ${bin_openssl} ocsp -text -no_nonce \
-    -issuer level-1.crt \
-    -CAfile bundle.crt \
+    -issuer "level-1.crt" \
+    -CAfile "bundle.crt" \
     -VAfile level-1.crt \
     -url "${SSL_CERT_OCSP_LAST}" \
     -serial "${SSL_CERT_SERIAL_FIRST}" \
