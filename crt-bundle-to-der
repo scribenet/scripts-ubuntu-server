@@ -22,7 +22,7 @@ source ${SELF_DIR}/common/common.bash
 
 TEMP_DIRPATH="/tmp/ssl-generate-der-from-crt-bundle/"
 SYSTEM_OPENSSL_ROOT_CERTIFICATES="/etc/ssl/certs/ca-certificates.crt"
-SYSTEM_OPENSSL_ROOT_CERTIFICATES="/System/Library/OpenSSL/certs/certs.pem"
+#SYSTEM_OPENSSL_ROOT_CERTIFICATES="/System/Library/OpenSSL/certs/certs.pem"
 DER_FILEEXT="der"
 PERFORM_CERTIFICATE_EXTENDED_VERIFY=0
 PERFORM_STAPLING_FILE_INSTALLATION=0

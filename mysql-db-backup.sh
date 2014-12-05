@@ -6,6 +6,14 @@
 ##
 
 #
+# configurable options
+#
+opt_ionice="-c2 -n7"
+opt_nice="-n20"
+opt_compress="-8 --blocksize 32 --processes 20"
+opt_mysql="--single-transaction --quick --lock-tables=false"
+
+#
 # check for (required) first and second parameters
 #
 if [[ -z "${1}" ]] || [[ -z "${2}" ]]; then
@@ -13,7 +21,7 @@ if [[ -z "${1}" ]] || [[ -z "${2}" ]]; then
   #
   # display usage and exit with non-zero value
   #
-  echo -e "Usage:\n\t${0} db_user db_pass [--disable-pigz]"
+  echo -e "Usage:\n\t${0} db_user db_pass [--no-compression]"
   exit 1
 
 else
@@ -26,15 +34,15 @@ else
 
 fi
 
-if [[ "${3}" == "--disable-pigz" ]]; then
+if [[ "${3}" == "--no-compression" ]]; then
 
   echo "Disabling compression of output files."
-  ENABLE_PIGS=0
+  ENABLE_COMPRESS=0
 
 else
 
   echo "Enabling compression of output files using pigz."
-  ENABLE_PIGS=1
+  ENABLE_COMPRESS=1
 
 fi
 
@@ -51,12 +59,15 @@ backup_dir="$PWD"
 #
 # find executable absolute locations
 #
-mysql="$(which mysql)"
-mysqldump="$(which mysqldump)"
-chown="$(which chown)"
-chmod="$(which chmod)"
-gzip="$(which pigz)"
-gzipopts="--best --processes 10"
+bin_mysql="$(which mysql)"
+bin_mysqldump="$(which mysqldump)"
+bin_chown="$(which chown)"
+bin_chmod="$(which chmod)"
+bin_compress="$(which pigz)"
+bin_ionice="$(which ionice)"
+bin_nice="$(which nice)"
+bin_date="$(which date)"
+bin_hostname="$(which hostname)"
 
 #
 # get system hostname
