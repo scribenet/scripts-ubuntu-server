@@ -25,12 +25,14 @@ BASE_DIR="/mnt/storage/@tmp/gstorage-mysql-dump-and-hotbackup/"
 MYSQL_DUMP_DIR_BASE="${BASE_DIR}dump/"
 MYSQL_DUMP_DIR="${MYSQL_DUMP_DIR_BASE}${NOW}"
 MYSQL_DUMP_CMD="${SELF_DIRPATH}/backup-databases-to-sql.bash"
+MYSQL_BACKUP_OPT="--be-nice"
 MYSQL_DUMP_BUCKET="${GSUTIL_BUCKET_BASE}dumps/"
 MYSQL_DUMP_USER="${MYSQL_CONTROL_USER}"
 MYSQL_DUMP_PASS="${MYSQL_CONTROL_PASS}"
 MYSQL_BACKUP_DIR_BASE="${BASE_DIR}backup/"
 MYSQL_BACKUP_DIR="${MYSQL_BACKUP_DIR_BASE}${NOW}"
 MYSQL_BACKUP_CMD="${SELF_DIRPATH}/backup-databases-as-hot.bash"
+MYSQL_BACKUP_OPT="--be-nice"
 MYSQL_BACKUP_BUCKET="${GSUTIL_BUCKET_BASE}backup/"
 MYSQL_BACKUP_USER="${MYSQL_CONTROL_USER}"
 MYSQL_BACKUP_PASS="${MYSQL_CONTROL_PASS}"
@@ -115,10 +117,10 @@ out_commands \
     "Executing MySQL Dumps" \
     "mkdir -p "${MYSQL_DUMP_DIR}"" \
     "cd "${MYSQL_DUMP_DIR}"" \
-    "${MYSQL_DUMP_CMD}"
+    "${MYSQL_DUMP_CMD} ${MYSQL_DUMP_OPT}"
 
 mkdir -p "${MYSQL_DUMP_DIR}" && cd "${MYSQL_DUMP_DIR}"
-${MYSQL_DUMP_CMD}
+${MYSQL_DUMP_CMD} ${MYSQL_DUMP_OPT}
 
 out_empty_lines && out_success "MySQL Dump: Complete"
 
@@ -147,10 +149,10 @@ out_stage \
 out_commands \
     "Executing MySQL InnoDB Hot-Backup" \
     "mkdir -p \"${MYSQL_BACKUP_DIR_BASE}\" && cd \"${MYSQL_BACKUP_DIR_BASE}\"" \
-    "${MYSQL_BACKUP_CMD}"
+    "${MYSQL_BACKUP_CMD} ${MYSQL_BACKUP_OPT}"
 
 mkdir -p "${MYSQL_BACKUP_DIR_BASE}" && cd "${MYSQL_BACKUP_DIR_BASE}"
-${MYSQL_BACKUP_CMD}
+${MYSQL_BACKUP_CMD} ${MYSQL_BACKUP_OPT}
 
 out_empty_lines && out_success "MySQL InnoDB Hot-Backup: Complete"
 
