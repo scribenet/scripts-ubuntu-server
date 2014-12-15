@@ -22,8 +22,8 @@ NOW="$(date +%s)"
 BONNIE_LOG_PATH="$(pwd)/.${SELF_SCRIPT}-${NOW}.log"
 OPT_BONNIE=""
 PATH_BONNIE=""
-BONNIE_OUTPUT_BASE="/www/static/bonnie/"
-BONNIE_HTML_BASE="https://static.scribenet.com/bonnie/"
+BONNIE_OUTPUT_BASE="/www/scribe-systems_benchmarks-boe/"
+BONNIE_HTML_BASE="https://benchmarks.boe.scribe.systems/"
 OUT_PROMPT_DEFAULT="y"
 
 ##

@@ -14,6 +14,19 @@ opt_compress="-8 --blocksize 32 --processes 20"
 opt_mysql="--single-transaction --quick --lock-tables=false"
 
 #
+# find executable absolute locations
+#
+bin_mysql="$(which mysql)"
+bin_mysqldump="$(which mysqldump)"
+bin_chown="$(which chown)"
+bin_chmod="$(which chmod)"
+bin_compress="$(which pigz)"
+bin_ionice="$(which ionice)"
+bin_nice="$(which nice)"
+bin_date="$(which date)"
+bin_hostname="$(which hostname)"
+
+#
 # check for (required) first and second parameters
 #
 if [[ -z "${1}" ]] || [[ -z "${2}" ]]; then
@@ -41,7 +54,7 @@ if [[ "${3}" == "--no-compression" ]]; then
 
 else
 
-  echo "Enabling compression of output files using pigz."
+  echo "Enabling compression of output files using ${bin_compress}."
   ENABLE_COMPRESS=1
 
 fi

@@ -21,10 +21,10 @@ SELF_SCRIPT_NAME="Google Storage - MySQL Dump/Backups"
 GSUTIL_BUCKET_BASE="gs://scribe-systems-boe-mysql/"
 GSUTIL_CP_OPT="-m cp -c -r "
 NOW="$(date +%s)"
-BASE_DIR="/tmp/gstorage-mysql-dump-and-hotbackup/"
+BASE_DIR="/mnt/storage/@tmp/gstorage-mysql-dump-and-hotbackup/"
 MYSQL_DUMP_DIR_BASE="${BASE_DIR}dump/"
 MYSQL_DUMP_DIR="${MYSQL_DUMP_DIR_BASE}${NOW}"
-MYSQL_DUMP_CMD="${SELF_DIR}/mysql-db-backup.sh"
+MYSQL_DUMP_CMD="${SELF_DIR}/mysql/mysql-db-dump-to-sql.sh"
 MYSQL_DUMP_BUCKET="${GSUTIL_BUCKET_BASE}dumps/"
 MYSQL_BACKUP_DIR_BASE="${BASE_DIR}backup/"
 MYSQL_BACKUP_DIR="${MYSQL_BACKUP_DIR_BASE}${NOW}"
@@ -161,12 +161,12 @@ out_stage \
 
 out_commands \
     "Uploading MySQL Dumps" \
-    "cd \"${MYSQL_DUMP_DIR_BASE}\"" \
-    "${bin_gsutil} ${GSUTIL_CP_OPT} \"./${NOW}/\" \"${MYSQL_DUMP_BUCKET}\"" \
+    "cd \"${MYSQL_DUMP_DIR}\"" \
+    "${bin_gsutil} ${GSUTIL_CP_OPT} \"./\" \"${MYSQL_DUMP_BUCKET}\"" \
     "${bin_rm} -fr ${MYSQL_DUMP_DIR}"
 
-cd "${MYSQL_DUMP_DIR_BASE}"
-${bin_gsutil} ${GSUTIL_CP_OPT} "./${NOW}/" "${MYSQL_DUMP_BUCKET}"
+cd "${MYSQL_DUMP_DIR}"
+${bin_gsutil} ${GSUTIL_CP_OPT} "./" "${MYSQL_DUMP_BUCKET}"
 ${bin_rm} -fr ${MYSQL_DUMP_DIR}
 
 out_empty_lines && out_success "Upload MySQL Dump: Complete"
@@ -193,17 +193,23 @@ out_stage \
 
 out_commands \
     "Uploading MySQL InnoDB Hot-Backup" \
-    "mkdir -p cd \"${MYSQL_BACKUP_DIR_BASE}\"" \
-    "${bin_gsutil} ${GSUTIL_CP_OPT} \"./${NOW}/\" \"${MYSQL_BACKUP_BUCKET}\"" \
+    "mkdir -p cd \"${MYSQL_BACKUP_DIR}\"" \
+    "${bin_gsutil} ${GSUTIL_CP_OPT} \"./\" \"${MYSQL_BACKUP_BUCKET}\"" \
     "${bin_rm} -fr ${MYSQL_BACKUP_DIR}"
 
-cd "${MYSQL_BACKUP_DIR_BASE}"
-${bin_gsutil} ${GSUTIL_CP_OPT} "./${NOW}/" "${MYSQL_BACKUP_BUCKET}"
+cd "${MYSQL_BACKUP_DIR}"
+${bin_gsutil} ${GSUTIL_CP_OPT} "./" "${MYSQL_BACKUP_BUCKET}"
 ${bin_rm} -fr ${MYSQL_BACKUP_DIR}
 
 out_empty_lines && out_success "Upload MySQL InnoDB Hot-Backup: Complete"
 
 out_success "All operations completed."
+
+## Exit
+exit 0
+
+## EOF
+ operations completed."
 
 ## Exit
 exit 0
