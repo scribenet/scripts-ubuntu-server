@@ -5,13 +5,13 @@
 ## Perform consistency check on /etc/passwd to /etc/shadow and /etc/group to /etc/gshadow
 ##
 
-## Where are we?
-SELF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+## Gain self-awareness and common library
+readonly SELF_DIRPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly BOOTSTRAP_FILENAME="common-bootstrap.bash"
+readonly BOOTSTRAP_FILEPATH="${SELF_DIRPATH}/../${BOOTSTRAP_FILENAME}"
 
-##
-## Include common functions
-##
-source ${SELF_DIR}/common/common.bash
+## Include common bootstrap
+source "${BOOTSTRAP_FILEPATH}"
 
 ##
 ## Configuration
