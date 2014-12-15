@@ -283,7 +283,7 @@ function out_notice
     #
     # Output message
     #
-    echo -en "${OUT_PRE}\n${OUT_PRE}Notice:\n${OUT_PRE}\n"
+    echo -en "${OUT_PRE}\n${OUT_PRE}$(${bin_tput} bold)$(echo "Notice" | tr '[:lower:]' '[:upper:]')$($bin_tput sgr0; $bin_tput setaf 3)\n"
     out_lines "${@}"
     echo -en "${OUT_PRE}\n\n"
 
@@ -343,7 +343,7 @@ function out_info
     #
     # Set window text color
     #
-    $bin_tput setaf 4
+    $bin_tput setaf 6
 
     #
     # Output message
@@ -441,13 +441,35 @@ function out_success
     #
     # Set window text color
     #
-    $bin_tput bold
-    $bin_tput setaf 2
+    $bin_tput setaf 6
 
     #
     # Output message
     #
     out_lines "${@}"
+    echo -en "\n"
+
+    #
+    # Reset window color
+    #
+    $bin_tput sgr0
+}
+
+## Display success messages
+function out_done
+{
+    #
+    # Set window text color
+    #
+    $bin_tput setaf 2
+
+    #
+    # Output message
+    #
+    echo -en "${OUT_PRE}\n"
+    out_lines "$(${bin_tput} bold)$(echo "Done:" | tr '[:lower:]' '[:upper:]')$(${bin_tput} sgr0; ${bin_tput} setaf 2) ${1}"
+    out_lines "${@:2}"
+    echo -en "${OUT_PRE}\n"
     echo -en "\n"
 
     #

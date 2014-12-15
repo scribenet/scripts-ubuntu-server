@@ -10,11 +10,13 @@
 ## @license MIT License
 ##
 
-##
-## Init script with understanding of self and other
-##
-SELF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source ${SELF_DIR}/common/common.bash
+## Gain self-awareness and common library
+readonly SELF_DIRPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly BOOTSTRAP_FILENAME="common-bootstrap.bash"
+readonly BOOTSTRAP_FILEPATH="${SELF_DIRPATH}/${BOOTSTRAP_FILENAME}"
+
+## Include common bootstrap
+source "${BOOTSTRAP_FILEPATH}"
 
 ##
 ## Configuration

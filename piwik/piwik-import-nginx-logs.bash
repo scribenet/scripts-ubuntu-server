@@ -9,6 +9,14 @@
 ## @license   MIT
 ##
 
+## Gain self-awareness and common library
+readonly SELF_DIRPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly BOOTSTRAP_FILENAME="common-bootstrap.bash"
+readonly BOOTSTRAP_FILEPATH="${SELF_DIRPATH}/${BOOTSTRAP_FILENAME}"
+
+## Include common bootstrap
+source "${BOOTSTRAP_FILEPATH}"
+
 ##
 ## Configuration
 ##
@@ -29,14 +37,6 @@ run_with_ionice_at=3
 
 ## Execution time limits
 loop_max_seconds=3600
-
-## Where are we?
-SELF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-##
-## Include common functions
-##
-source ${SELF_DIR}/common/common.bash
 
 ##
 ## Function definitions

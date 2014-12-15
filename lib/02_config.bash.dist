@@ -1,0 +1,15 @@
+#!/bin/bash
+
+##
+## Scribe Inc
+## Handle any initial config that should take place prior to function inclusion.
+##
+## @author Rob Frawley 2nd <rmf@scribe.tools>
+##
+
+readonly BASH_COMMON_BOOTSTRAP_DIRPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+MYSQL_CONTROL_USER=""
+MYSQL_CONTROL_PASS=""
+
+## EOF

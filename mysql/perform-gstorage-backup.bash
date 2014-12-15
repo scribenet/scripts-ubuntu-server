@@ -5,13 +5,13 @@
 ## Backup MySQL databases and upload to Google Cloud Storage
 ##
 
-## Where are we?
-SELF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+## Gain self-awareness and common library
+readonly SELF_DIRPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly BOOTSTRAP_FILENAME="common-bootstrap.bash"
+readonly BOOTSTRAP_FILEPATH="${SELF_DIRPATH}/${BOOTSTRAP_FILENAME}"
 
-##
-## Include common functions
-##
-source ${SELF_DIR}/common/common.bash
+## Include common bootstrap
+source "${BOOTSTRAP_FILEPATH}"
 
 ##
 ## Configuration
@@ -24,12 +24,16 @@ NOW="$(date +%s)"
 BASE_DIR="/mnt/storage/@tmp/gstorage-mysql-dump-and-hotbackup/"
 MYSQL_DUMP_DIR_BASE="${BASE_DIR}dump/"
 MYSQL_DUMP_DIR="${MYSQL_DUMP_DIR_BASE}${NOW}"
-MYSQL_DUMP_CMD="${SELF_DIR}/mysql/mysql-db-dump-to-sql.sh"
+MYSQL_DUMP_CMD="${SELF_DIRPATH}/mysql/backup-databases-to-sql.bash"
 MYSQL_DUMP_BUCKET="${GSUTIL_BUCKET_BASE}dumps/"
+MYSQL_DUMP_USER="${MYSQL_CONTROL_USER}"
+MYSQL_DUMP_PASS="${MYSQL_CONTROL_PASS}"
 MYSQL_BACKUP_DIR_BASE="${BASE_DIR}backup/"
 MYSQL_BACKUP_DIR="${MYSQL_BACKUP_DIR_BASE}${NOW}"
-MYSQL_BACKUP_OPT="--no-timestamp"
+MYSQL_BACKUP_CMD="${SELF_DIRPATH}/mysql/backup-databases-as-hot.bash"
 MYSQL_BACKUP_BUCKET="${GSUTIL_BUCKET_BASE}backup/"
+MYSQL_BACKUP_USER="${MYSQL_CONTROL_USER}"
+MYSQL_BACKUP_PASS="${MYSQL_CONTROL_PASS}"
 
 export BOTO_CONFIG=/opt/gsutil/.boto
 
@@ -54,17 +58,7 @@ function out_usage_custom
     # Display script usage message
     #
     echo -en \
-        "\nUsage:\n\t${SELF_FILENAME} mysql_dump_user mysql_dump_pass [mysql_backup_user mysql_backup_pass]\n\n" \
-        "\tmysql_dump_user\n" \
-        "\t\tUser name with privlages to dump a database.\n" \
-        "\n\tmysql_dump_pass\n" \
-        "\t\tUser password with privlages to dump a database.\n" \
-        "\n\tmysql_backup_user\n" \
-        "\t\tUser name with full permissions on server (for percona hot-backup).\n" \
-        "\t\tDefaults to the value of mysql_dump_user.\n" \
-        "\n\tmysql_backup_pass\n" \
-        "\t\tUser password with full permissions on server (for percona hot-backup).\n" \
-        "\t\tDefaults to the value of mysql_dump_pass.\n" \
+        "\nUsage:\n\t${SELF_FILENAME}" \
         "\n"
 }
 
@@ -77,32 +71,6 @@ if [[ -z "${1}" ]] || [[ -z "${2}" ]]; then
     # display usage and exit with non-zero value
     #
     out_usage
-
-else
-
-    #
-    # define dump db user and password
-    #
-    MYSQL_DUMP_USER="${1}"
-    MYSQL_DUMP_PASS="${2}"
-
-    if [[ -z "${3}" ]] || [[ -z "${4}" ]]; then
-
-        #
-        # define percona innodb hot-backup user and password from dump creds
-        #
-        MYSQL_BACKUP_USER="${MYSQL_DUMP_USER}"
-        MYSQL_BACKUP_PASS="${MYSQL_DUMP_PASS}"
-
-    else
-
-        #
-        # define percona innodb hot-backup user and password
-        #
-        MYSQL_BACKUP_USER="${3}"
-        MYSQL_BACKUP_PASS="${4}"
-
-    fi
 
 fi
 
@@ -117,7 +85,7 @@ fi
 out_welcome
 
 ## Check for require bins
-check_bins_and_setup_abs_path_vars rm gsutil innobackupex
+check_bins_and_setup_abs_path_vars rm gsutil
 
 ## Configuration file used
 out_info \
@@ -147,10 +115,10 @@ out_commands \
     "Executing MySQL Dumps" \
     "mkdir -p "${MYSQL_DUMP_DIR}"" \
     "cd "${MYSQL_DUMP_DIR}"" \
-    "${MYSQL_DUMP_CMD} "${MYSQL_DUMP_USER}" "${MYSQL_DUMP_PASS}""
+    "${MYSQL_DUMP_CMD}"
 
 mkdir -p "${MYSQL_DUMP_DIR}" && cd "${MYSQL_DUMP_DIR}"
-${MYSQL_DUMP_CMD} "${MYSQL_DUMP_USER}" "${MYSQL_DUMP_PASS}"
+${MYSQL_DUMP_CMD}
 
 out_empty_lines && out_success "MySQL Dump: Complete"
 
@@ -179,10 +147,10 @@ out_stage \
 out_commands \
     "Executing MySQL InnoDB Hot-Backup" \
     "mkdir -p \"${MYSQL_BACKUP_DIR_BASE}\" && cd \"${MYSQL_BACKUP_DIR_BASE}\"" \
-    "${bin_innobackupex} --user=\"${MYSQL_BACKUP_USER}\" --password=\"${MYSQL_BACKUP_PASS}\" \"${MYSQL_BACKUP_DIR}\" ${MYSQL_BACKUP_OPT}"
+    "${MYSQL_BACKUP_CMD}"
 
 mkdir -p "${MYSQL_BACKUP_DIR_BASE}" && cd "${MYSQL_BACKUP_DIR_BASE}"
-${bin_innobackupex} --user="${MYSQL_BACKUP_USER}" --password="${MYSQL_BACKUP_PASS}" "${MYSQL_BACKUP_DIR}" ${MYSQL_BACKUP_OPT}
+${MYSQL_BACKUP_CMD}
 
 out_empty_lines && out_success "MySQL InnoDB Hot-Backup: Complete"
 
@@ -203,13 +171,7 @@ ${bin_rm} -fr ${MYSQL_BACKUP_DIR}
 
 out_empty_lines && out_success "Upload MySQL InnoDB Hot-Backup: Complete"
 
-out_success "All operations completed."
-
-## Exit
-exit 0
-
-## EOF
- operations completed."
+out_done "All operations completed."
 
 ## Exit
 exit 0
