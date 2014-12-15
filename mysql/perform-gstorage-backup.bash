@@ -65,7 +65,7 @@ function out_usage_custom
 #
 # check for (required) first and second parameters
 #
-if [[ -z "${1}" ]] || [[ -z "${2}" ]]; then
+if [[ $(echo "$@" | grep -E -p "\-?\-h(elp)?\b") ]]; then
 
     #
     # display usage and exit with non-zero value
