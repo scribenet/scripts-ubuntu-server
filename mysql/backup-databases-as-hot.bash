@@ -31,7 +31,7 @@ opt_nice="-n20"
 ## Internal Configuration
 ##
 SELF_SCRIPT_NAME="MySQL Hot-Backup"
-OUT_PROMPT_DEFAULT=""
+OUT_PROMPT_DEFAULT="y"
 
 ##
 ## Function definitions
