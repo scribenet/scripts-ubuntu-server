@@ -152,7 +152,7 @@ out_commands \
     "${MYSQL_BACKUP_CMD} ${MYSQL_BACKUP_OPT}"
 
 mkdir -p "${MYSQL_BACKUP_DIR_BASE}" && cd "${MYSQL_BACKUP_DIR_BASE}"
-${MYSQL_BACKUP_CMD} ${MYSQL_BACKUP_OPT}
+${MYSQL_BACKUP_CMD} ${MYSQL_BACKUP_OPT} --no-timestamp -o "${MYSQL_BACKUP_DIR}"
 
 out_empty_lines && out_success "MySQL InnoDB Hot-Backup: Complete"
 
