@@ -5,8 +5,8 @@ This repository contains a collection of helper scripts specifically created and
 The included scripts, including a basic description of their use, is as follows:
 
 - `dl/`
-      - `update-geolitecity-db.bash`
-        Useful as a stand-alone command or a cron job to update youu GeoLite database.
+    - `update-geolitecity-db.bash`
+      Useful as a stand-alone command or a cron job to update youu GeoLite database.
 
 - `gitlab/`
     - `backup-config.bash`
