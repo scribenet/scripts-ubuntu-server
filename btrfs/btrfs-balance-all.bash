@@ -1,0 +1,82 @@
+#!/bin/bash
+
+##
+## Scribe Inc
+## Get the latest GeoLiteCity datebase file
+##
+
+## Gain self-awareness and common library
+readonly SELF_DIRPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly BOOTSTRAP_FILENAME="common-bootstrap.bash"
+readonly BOOTSTRAP_FILEPATH="${SELF_DIRPATH}/../${BOOTSTRAP_FILENAME}"
+
+## Include common bootstrap
+source "${BOOTSTRAP_FILEPATH}"
+
+##
+## User Configuration
+##
+btrfs_vols="/mnt/storage/ /mnt/main/ /mnt/volatile/ /mnt/web/"
+btrfs_increments=$(seq 3)
+
+## Display welcome message
+function out_welcome_custom 
+{
+    out_lines \
+        "${SELF_SCRIPT_NAME}" \
+        "" \
+        "Performs an incremental balance on all volumes."
+}
+
+## Check for any variant of -h|--help|-help|--h and display program usage
+if [[ $(echo "$@" | grep -E -e "\-?\-h(elp)?\b") ]];
+then
+    out_usage
+fi
+
+## Welcome message
+out_welcome
+
+## Check for required bins
+check_bins_and_setup_abs_path_vars btrfs wc
+
+## Show runtime configuration setup
+out_info_config \
+    "Runtime Configuration:" \
+    "" \
+    "  Btrfs Path -> ${bin_btrfs}" \
+    "  Volumes    -> ${btrfs_vols}" \
+    "  Increments -> ${btrfs_increments}"
+
+## Allow the user to bail
+out_prompt_boolean "0" "Would you like to continue?" "Confirm Config" "y"
+
+## Get final count of volumes to iterate over
+btrfs_vols_count="$(echo "${btrfs_vols}" | ${bin_wc} -w)"
+
+## Foreach volume
+for volume in ${btrfs_vols}
+do
+    ## User Output
+    out_stage \
+        "1" \
+        "${btrfs_vols_count}" \
+        "Balancing: ${volume}"
+
+    for btrfs_increment in ${btrfs_increments}
+    do
+
+        out_info \
+            "Running with durage value of ${btrfs_increment}."
+
+        ${bin_btrfs} fi balance -dusage=${btrfs_increment} ${volume} > /dev/null 2>&1
+
+    done
+
+done
+
+## Done
+out_done \
+    "Completed all operations!"
+
+## EOF
