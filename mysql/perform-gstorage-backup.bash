@@ -119,8 +119,8 @@ out_commands \
     "cd "${MYSQL_DUMP_DIR}"" \
     "${MYSQL_DUMP_CMD} ${MYSQL_DUMP_OPT}"
 
-mkdir -p "${MYSQL_DUMP_DIR}" && cd "${MYSQL_DUMP_DIR}"
-${MYSQL_DUMP_CMD} ${MYSQL_DUMP_OPT}
+#mkdir -p "${MYSQL_DUMP_DIR}" && cd "${MYSQL_DUMP_DIR}"
+#${MYSQL_DUMP_CMD} ${MYSQL_DUMP_OPT}
 
 out_empty_lines && out_success "MySQL Dump: Complete"
 
@@ -135,9 +135,9 @@ out_commands \
     "${bin_gsutil} ${GSUTIL_CP_OPT} \"./\" \"${MYSQL_DUMP_BUCKET}\"" \
     "${bin_rm} -fr ${MYSQL_DUMP_DIR}"
 
-cd "${MYSQL_DUMP_DIR}"
-${bin_gsutil} ${GSUTIL_CP_OPT} "./" "${MYSQL_DUMP_BUCKET}"
-${bin_rm} -fr ${MYSQL_DUMP_DIR}
+#cd "${MYSQL_DUMP_DIR}"
+#${bin_gsutil} ${GSUTIL_CP_OPT} "./" "${MYSQL_DUMP_BUCKET}"
+#${bin_rm} -fr ${MYSQL_DUMP_DIR}
 
 out_empty_lines && out_success "Upload MySQL Dump: Complete"
 

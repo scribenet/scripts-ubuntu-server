@@ -27,7 +27,7 @@ local_temp="/tmp/geolitecity-database-updater"
 ##
 SELF_SCRIPT_NAME="GeoIP Database Updater"
 SELF_STEPS_TOTAL="5"
-OUT_PROMPT_DEFAULT=""
+OUT_PROMPT_DEFAULT="y"
 
 ## Display welcome message
 function out_welcome_custom {

@@ -24,10 +24,10 @@ source "${BOOTSTRAP_FILEPATH}"
 ## Piwik log import command config
 piwik_reprocess_logs_after_import=0
 piwik_url="https://piwik.scribe.systems/"
-piwik_console_script_path="/www/private/piwik/console"
+piwik_console_script_path="/www/scribe-systems_piwik/console"
 piwik_console_script_opts="--force-all-websites --force-all-periods=315576000 --force-date-last-n=1000"
-piwik_log_import_script_path="/www/private/piwik/misc/log-analytics/import_logs.py"
-piwik_log_import_script_opts="--recorders=400 --enable-http-errors --enable-http-redirects --enable-static --enable-bots --enable-reverse-dns"
+piwik_log_import_script_path="/www/scribe-systems_piwik/misc/log-analytics/import_logs.py"
+piwik_log_import_script_opts="--recorders=10 --enable-http-errors --enable-http-redirects --enable-static --enable-bots --enable-reverse-dns --show-progress"
 
 ## Ionice/nice config
 run_with_nice=1
@@ -133,7 +133,7 @@ function get_command_piwik_log_import
     #
     # Echo the compiled final command for consumption into a variable
     #
-    echo "${bin_python} ${piwik_log_import_script_path} ${piwik_log_import_script_opts} --url=${piwik_url} --idsite=${site_id} ${server_log}"
+    echo "${bin_python} ${piwik_log_import_script_path} ${piwik_log_import_script_opts} --output=${script_log} --url=${piwik_url} --idsite=${site_id} ${server_log}"
 }
 
 ## Get the Piwik console process command
@@ -255,6 +255,11 @@ out_info \
     "  -> Script Path   : ${piwik_log_import_script_path}" \
     "  -> Script Opts   : ${piwik_log_import_script_opts}"
 
+#
+# Create our log file
+#
+touch "${script_log}"
+
 ##
 ## Start our "main" function loop.
 ## Continue calling piwik import script until it finishes successfully
@@ -278,7 +283,8 @@ while true ; do
     # Run the command
     #
     out_info "Importing logs..."
-    $(get_command_pre) $(get_command_piwik_log_import) > ${script_log} 2>&1
+    #$(get_command_pre) $(get_command_piwik_log_import) > "${script_log}" 2>&1
+    $(get_command_pre) $(get_command_piwik_log_import)
 
     #
     # Determine if the script finished successfully
@@ -304,6 +310,9 @@ while true ; do
         #
         # Get skip-to point from log file
         #
+        echo "DEBUG:START"
+        tail -n 25 "${script_log}"
+        echo "DEBUG:END"
         start_skip="$(${bin_grep} -oh "skip=[0-9]*" "${script_log}" | ${bin_head} -n1 | ${bin_tr} "=" "\n" | ${bin_tail} -n1)"
 
         #

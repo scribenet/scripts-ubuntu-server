@@ -25,7 +25,7 @@ MODE_OFF="off"
 MODE_ON="on"
 
 ## Path to datetime text file for when maintenance mode is enabled
-TEXT_STATUS_FILEPATH="/www/private/offline/text-back-online.txt"
+TEXT_STATUS_FILEPATH="/www/_internal-share/offline/text-back-online.txt"
 
 ##
 ## Function definitions
@@ -168,7 +168,9 @@ out_info "Handling request:" \
 ##
 ## Reset text status file
 ##
+set +e
 rm ${TEXT_STATUS_FILEPATH}
+set -e
 touch ${TEXT_STATUS_FILEPATH}
 
 ##
