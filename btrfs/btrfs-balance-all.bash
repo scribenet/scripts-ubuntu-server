@@ -17,7 +17,7 @@ source "${BOOTSTRAP_FILEPATH}"
 ## User Configuration
 ##
 btrfs_vols="/mnt/storage/ /mnt/main/ /mnt/volatile/ /mnt/web/"
-btrfs_seq=3
+btrfs_seq=55
 
 ##
 ## Internal Configuration
