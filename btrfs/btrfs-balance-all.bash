@@ -73,7 +73,8 @@ do
     do
 
         out_info \
-            "Running with durage value of ${btrfs_increment}."
+            "Running with durage value of ${btrfs_increment}." \
+            "Command: ${bin_btrfs} fi balance -dusage=${btrfs_increment} ${volume} > /dev/null 2>&1"
 
         ${bin_btrfs} fi balance -dusage=${btrfs_increment} ${volume} > /dev/null 2>&1
 
