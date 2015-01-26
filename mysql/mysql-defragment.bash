@@ -48,10 +48,12 @@ fi
 out_welcome
 
 ## Check for require bins
-check_bins_and_setup_abs_path_vars mysql grep
+check_bins_and_setup_abs_path_vars mysql grep mysql_config_editor
 
-${bin_mysql} --user=${db_user} --password=${db_pass} -NBe "SHOW DATABASES;" | ${bin_grep} -v 'lost+found' | while read database ; do
-${bin_mysql} --user=${db_user} --password=${db_pass} -NBe "SHOW TABLE STATUS;" $database | while read name engine version rowformat rows avgrowlength datalength maxdatalength indexlength datafree autoincrement createtime updatetime checktime collation checksum createoptions comment ; do
+${bin_mysql_config_editor} set --skip-warn --login-path=local --host=localhost --user=${db_user} --password=${db_pass}
+
+${bin_mysql} --login-path=local -NBe "SHOW DATABASES;" | ${bin_grep} -v 'lost+found' | while read database ; do
+${bin_mysql} --login-path=local -NBe "SHOW TABLE STATUS;" $database | while read name engine version rowformat rows avgrowlength datalength maxdatalength indexlength datafree autoincrement createtime updatetime checktime collation checksum createoptions comment ; do
         if [ "$datafree" != "NULL" ] && [ "$datafree" -gt 0 ] ; then
             fragmentation=$(($datafree * 100 / $datalength))
             echo " - $database.$name is $fragmentation% fragmented."
@@ -61,9 +63,9 @@ ${bin_mysql} --user=${db_user} --password=${db_pass} -NBe "SHOW TABLE STATUS;" $
                 echo "Skipping per explicit request."
             else
                 echo "Performing optomization routing."
-                echo "   |- Command   : ${bin_mysql} --user=${db_user} --password=${db_pass} -NBe \"OPTIMIZE TABLE '$name';\" \"$database\""
+                echo "   |- Command   : ${bin_mysql} --login-path=local -NBe \"OPTIMIZE TABLE '$name';\" \"$database\""
                 echo -n "   |- Optimizing:"
-                ${bin_mysql} --user=${db_user} --password=${db_pass} -NBe "OPTIMIZE TABLE $name;" "$database" > /dev/null
+                ${bin_mysql} --login-path=local -NBe "OPTIMIZE TABLE $name;" "$database" > /dev/null
                 if [ "$?" -eq 0 ]; then
                     echo "Complete!"
                 else
