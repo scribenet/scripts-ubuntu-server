@@ -37,6 +37,12 @@ fi
 ## Welcome message
 out_welcome
 
+## This script can only be run by root
+if [[ $EUID -ne 0 ]]; then
+   out_error "This script must be run as root. Try sudo."
+   exit 1
+fi
+
 ## Check for required bins
 check_bins_and_setup_abs_path_vars btrfs wc
 
