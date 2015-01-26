@@ -50,7 +50,7 @@ out_welcome
 ## Check for require bins
 check_bins_and_setup_abs_path_vars mysql grep mysql_config_editor
 
-${bin_mysql_config_editor} set --skip-warn --login-path=local --host=localhost --user=${db_user} --password=${db_pass} > /dev/null > 2>&1
+${bin_mysql_config_editor} set --skip-warn --login-path=local --host=localhost --user=${db_user} --password=${db_pass} > /dev/null 2>&1
 
 ${bin_mysql} --login-path=local -NBe "SHOW DATABASES;" | ${bin_grep} -v 'lost+found' | while read database ; do
 ${bin_mysql} --login-path=local -NBe "SHOW TABLE STATUS;" $database | while read name engine version rowformat rows avgrowlength datalength maxdatalength indexlength datafree autoincrement createtime updatetime checktime collation checksum createoptions comment ; do
