@@ -17,12 +17,12 @@
 APP_NAME=crowd
 RUN_AS_USER=atcrowd
 KILL_WAIT=30
-CATALINA_HOME=/opt/atlassian/$APP_NAME/apache-tomcat
-PID_FILE=$CATALINA_HOME/work/$APP_NAME.pid
+APP_HOME=/opt/atlassian/$APP_NAME/apache-tomcat
+PID_FILE=$APP_HOME/work/$APP_NAME.pid
 SCRIPT_PID_VAR="CATALINA_PID=$PID_FILE"
 SCRIPT_COMMON_PRE="${SCRIPT_PID_VAR} bash -c"
-SCRIPT_START="$CATALINA_HOME/bin/catalina.sh start"
-SCRIPT_STOP="$CATALINA_HOME/bin/catalina.sh stop $KILL_WAIT -force"
+SCRIPT_START="$APP_HOME/bin/catalina.sh start"
+SCRIPT_STOP="$APP_HOME/bin/catalina.sh stop $KILL_WAIT -force"
 SCRIPT_LOG="/dev/null"
 
 #
@@ -76,7 +76,7 @@ out_state() {
 # Get the status of the program
 #
 status_as_int() {
-        STATUS=$( ps aux | grep "[c]atalina.base=$CATALINA_HOME" | wc -l )
+        STATUS=$( ps aux | grep "[c]atalina.base=$APP_HOME" | wc -l )
         if [ $STATUS -gt 0 ]; then
                 echo 1
         else

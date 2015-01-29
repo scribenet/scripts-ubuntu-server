@@ -4,7 +4,7 @@
 # Provides:          atlassian-bamboo
 # Required-Start:    $local_fs $remote_fs $network $syslog $named
 # Required-Stop:     $local_fs $remote_fs $network $syslog $named
-# Should-Start:      postgresql
+# Should-Start:      postgresql atlassian-crowd
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # X-Interactive:     true
@@ -17,12 +17,12 @@
 APP_NAME=bamboo
 RUN_AS_USER=atbamboo
 KILL_WAIT=30
-CATALINA_HOME=/opt/atlassian/$APP_NAME
-PID_FILE=$CATALINA_HOME/work/$APP_NAME.pid
+APP_HOME=/opt/atlassian/$APP_NAME
+PID_FILE=$APP_HOME/work/$APP_NAME.pid
 SCRIPT_PID_VAR="CATALINA_PID=$PID_FILE"
 SCRIPT_COMMON_PRE="${SCRIPT_PID_VAR} bash -c"
-SCRIPT_START="$CATALINA_HOME/bin/start-bamboo.sh"
-SCRIPT_STOP="$CATALINA_HOME/bin/catalina.sh stop $KILL_WAIT -force"
+SCRIPT_START="$APP_HOME/bin/start-bamboo.sh"
+SCRIPT_STOP="$APP_HOME/bin/catalina.sh stop $KILL_WAIT -force"
 SCRIPT_LOG="/dev/null"
 
 #
@@ -76,7 +76,7 @@ out_state() {
 # Get the status of the program
 #
 status_as_int() {
-        STATUS=$( ps aux | grep "[c]atalina.base=$CATALINA_HOME" | wc -l )
+        STATUS=$( ps aux | grep "[c]atalina.base=$APP_HOME" | wc -l )
         if [ $STATUS -gt 0 ]; then
                 echo 1
         else
