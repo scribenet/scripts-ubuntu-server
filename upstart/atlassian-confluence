@@ -1,21 +1,21 @@
 #!/bin/bash
 
 ### BEGIN INIT INFO
-# Provides:          atlassian-stash
+# Provides:          atlassian-confluence
 # Required-Start:    $local_fs $remote_fs $network $syslog $named
 # Required-Stop:     $local_fs $remote_fs $network $syslog $named
 # Should-Start:      postgresql atlassian-crowd
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # X-Interactive:     true
-# Short-Description: Stop/start Atlassian Stash
+# Short-Description: Stop/start Atlassian Bamboo
 ### END INIT INFO
 
 #
 # Configuration
 #
-APP_NAME=stash
-RUN_AS_USER=atstash
+APP_NAME=confluence
+RUN_AS_USER=atconfluence
 KILL_WAIT=30
 APP_HOME=/opt/atlassian/$APP_NAME
 PID_FILE=$APP_HOME/work/catalina.pid
@@ -170,3 +170,4 @@ esac
 exit 0
 
 # EOF
+

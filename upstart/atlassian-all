@@ -1,0 +1,41 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          atlassian-status
+# X-Interactive:     true
+# Short-Description: Status for all Atlassian products
+### END INIT INFO
+
+#
+# Configuration
+#
+readonly SCRIPT_DIRPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+#
+# Display the status of the program
+#
+status() {
+        for f in ${SCRIPT_DIRPATH}/atlassian-*; do
+                if [ "${f}" != "${0}" ]; then
+                        ${f} status
+                fi
+        done
+}
+
+#
+# Stop/start/status action selector
+#
+case "$1" in
+        status)
+                status
+                ;;
+        *)
+                echo "Usage: ${0} [status]"
+esac
+
+#
+# Exit with zero return value
+#
+exit 0
+
+# EOF
