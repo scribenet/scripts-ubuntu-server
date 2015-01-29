@@ -23,7 +23,7 @@ status() {
 }
 
 #
-# Stop/start/status action selector
+# Action selector
 #
 case "$1" in
         status)
