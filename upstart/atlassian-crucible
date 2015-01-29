@@ -1,0 +1,170 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          atlassian-crucible
+# Required-Start:    $local_fs $remote_fs $network $syslog $named
+# Required-Stop:     $local_fs $remote_fs $network $syslog $named
+# Should-Start:      postgresql atlassian-crowd
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# X-Interactive:     true
+# Short-Description: Stop/start Atlassian Crucible
+### END INIT INFO
+
+#
+# Configuration
+#
+APP_NAME=crucible
+RUN_AS_USER=atcrucible
+KILL_WAIT=30
+APP_HOME=/opt/atlassian/$APP_NAME
+SCRIPT_COMMON_PRE="bash -c"
+SCRIPT_START="${APP_HOME}/bin/fisheyectl.sh start"
+SCRIPT_STOP="${APP_HOME}/bin/fisheyectl.sh stop"
+SCRIPT_LOG="/dev/null"
+
+#
+# Output prefix
+#
+out_line_prefix() {
+        echo -n -e "[${APP_NAME}]"
+}
+
+#
+# Output beginning of line
+#
+out_line_start() {
+        echo -n -e "$(out_line_prefix) ${1}"
+}
+
+#
+# Output additional line text
+#
+out_line_more() {
+        echo -n -e "${1}"
+}
+
+#
+# Output ending line text (followed by newline)
+#
+out_line_end() {
+        if [ -n "${1}" ]; then
+                echo -n -e "${1}\n"
+        else
+                echo -n -e "\n"
+        fi
+}
+
+#
+# Output regular line
+#
+out_line() {
+        out_line_start "${1}"
+        out_line_end
+}
+
+#
+# Output a regular line with a state prefix
+#
+out_state() {
+        out_line "${1}: ${2}"
+}
+
+#
+# Get the status of the program
+#
+status_as_int() {
+        STATUS=$( ps aux | grep "[j]ava.endorsed.dirs=${APP_HOME}" | wc -l )
+        if [ $STATUS -gt 0 ]; then
+                echo 1
+        else
+                echo 0
+        fi
+}
+
+#
+# Display the status of the program
+#
+status() {
+        if [ $(status_as_int) -eq 1 ]; then
+                out_state "Status" "Running."
+        else
+                out_state "Status" "Not running."
+        fi
+}
+
+#
+# Attempt to start the service
+#
+start() {
+        local return_code=0;
+
+        if [ $(status_as_int) -eq 1 ]; then
+                out_state "Error" "Already running; aborting start."
+        else
+                out_line_start "Starting..."
+
+                if [ "x$USER" != "x$RUN_AS_USER" ]; then
+                        su - $RUN_AS_USER -c "$SCRIPT_COMMON_PRE \"$SCRIPT_START\" > ${SCRIPT_LOG} 2>&1"
+                else
+                        $SCRIPT_COMMON_PRE "$SCRIPT_START" > ${SCRIPT_LOG} 2>&1
+                fi
+                return_code=$?
+
+                if [ ${return_code} -eq 0 ]; then
+                        out_line_end "Success."
+                else
+                        out_line_end "Failure!"
+                fi
+        fi
+}
+
+#
+# Attempt to stop the service
+#
+stop() {
+        local return_code=0;
+
+        out_line_start "Stopping..."
+
+        if [ "x$USER" != "x$RUN_AS_USER" ]; then
+                su - $RUN_AS_USER -c "$SCRIPT_COMMON_PRE \"$SCRIPT_STOP\" > ${SCRIPT_LOG} 2>&1"
+        else
+                $SCRIPT_COMMON_PRE "$SCRIPT_STOP" > ${SCRIPT_LOG} 2>&1
+        fi
+        return_code=$?
+
+        if [ ${return_code} -eq 0 ]; then
+                out_line_end "Success."
+        else
+                out_line_end "Failure!"
+        fi
+}
+
+#
+# Stop/start/status action selector
+#
+case "$1" in
+        status)
+                status
+                ;;
+        start)
+                start
+                ;;
+        stop)
+                stop
+                ;;
+        restart)
+                stop
+                start
+                ;;
+        *)
+                echo "Usage: ${0} [start|stop|status|restart]"
+esac
+
+#
+# Exit with zero return value
+#
+exit 0
+
+# EOF
