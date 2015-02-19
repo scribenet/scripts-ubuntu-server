@@ -1,3 +1,4 @@
 /lib/02_config.bash
 /external/
+/mysql/mysqld_multi
 *DS_Store*
