@@ -21,7 +21,7 @@ APP_HOME=/opt/atlassian/$APP_NAME/apache-tomcat
 PID_FILE=$APP_HOME/work/$APP_NAME.pid
 SCRIPT_PID_VAR="CATALINA_PID=$PID_FILE"
 SCRIPT_COMMON_PRE="${SCRIPT_PID_VAR} bash -c"
-SCRIPT_START="$APP_HOME/bin/catalina.sh start"
+SCRIPT_START="authbind --deep $APP_HOME/bin/catalina.sh start"
 SCRIPT_STOP="$APP_HOME/bin/catalina.sh stop $KILL_WAIT -force"
 SCRIPT_LOG="/dev/null"
 
@@ -29,7 +29,7 @@ SCRIPT_LOG="/dev/null"
 # Output prefix
 #
 out_line_prefix() {
-        echo -n -e "[${APP_NAME}]"
+        echo -n -e "[${APP_NAME}     ]"
 }
 
 #

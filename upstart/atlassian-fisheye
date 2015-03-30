@@ -1,25 +1,25 @@
 #!/bin/bash
 
 ### BEGIN INIT INFO
-# Provides:          atlassian-crucible
+# Provides:          atlassian-fisheye
 # Required-Start:    $local_fs $remote_fs $network $syslog $named
 # Required-Stop:     $local_fs $remote_fs $network $syslog $named
 # Should-Start:      postgresql atlassian-crowd
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # X-Interactive:     true
-# Short-Description: Stop/start Atlassian Crucible
+# Short-Description: Stop/start Atlassian Fisheye
 ### END INIT INFO
 
 #
 # Configuration
 #
-APP_NAME=crucible
-RUN_AS_USER=atcrucible
+APP_NAME=fisheye
+RUN_AS_USER=atfisheye
 KILL_WAIT=30
 APP_HOME=/opt/atlassian/$APP_NAME
 SCRIPT_COMMON_PRE="bash -c"
-SCRIPT_START="${APP_HOME}/bin/fisheyectl.sh start"
+SCRIPT_START="authbind --deep ${APP_HOME}/bin/fisheyectl.sh start"
 SCRIPT_STOP="${APP_HOME}/bin/fisheyectl.sh stop"
 SCRIPT_LOG="/dev/null"
 
@@ -27,7 +27,7 @@ SCRIPT_LOG="/dev/null"
 # Output prefix
 #
 out_line_prefix() {
-        echo -n -e "[${APP_NAME}]"
+        echo -n -e "[${APP_NAME}   ]"
 }
 
 #
