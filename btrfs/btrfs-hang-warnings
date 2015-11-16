@@ -1,0 +1,48 @@
+#!/bin/bash
+
+##
+## Scribe Inc
+## Loop over btrfs filesystems and scrub 'em
+##
+
+## Gain self-awareness and common library
+readonly SELF_DIRPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly BOOTSTRAP_FILENAME="common-bootstrap.bash"
+readonly BOOTSTRAP_FILEPATH="${SELF_DIRPATH}/../${BOOTSTRAP_FILENAME}"
+
+## Include common bootstrap
+source "${BOOTSTRAP_FILEPATH}"
+
+##
+## Internal Configuration
+##
+SELF_SCRIPT_NAME="Check for Btrfs Bugs (High hung process count, swap over-use)"
+OUT_PROMPT_DEFAULT="y"
+MAXLA=20;
+MINSWAP=25;
+
+##
+## Display welcome message
+##
+function out_welcome_custom
+{
+    out_lines \
+        "${SELF_SCRIPT_NAME}" \
+        "" \
+        "Outputs processes when load average is above "$(MAXLA)", then always show processes that are blocked" \
+        "on wait_current_trans.isra.15, and lastly show swap if it drops below "$(MINSWAP)". No output is good."
+}
+
+##
+## Check for any variant of -h|--help|-help|--h and display program usage
+##
+if [[ $(echo "$@" | grep -E -e "\-?\-h(elp)?\b") ]];
+then
+    out_usage
+fi
+
+##
+## GO!
+##
+
+if [ $(echo "$(awk '{print $1}' < /proc/loadavg) > $MAXLA" | bc) -eq 1 ]; then cat /proc/loadavg; ps -eo state,pid,etime,wchan:30,args; fi; ps -eo pid,etime,wchan:30,args | grep -q [w]ait_current_trans.isra.15; if [ $(echo "$(free | grep 'Swap' | awk '{t = $2; f = $4; print (f/t*100)}') < $MINSWAP" | bc) -eq 1 ]; then free; fi

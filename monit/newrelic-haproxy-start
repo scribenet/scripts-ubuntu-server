@@ -1,0 +1,12 @@
+#!/bin/bash
+PID=$(pidof /usr/bin/ruby2.1 /usr/local/bin/newrelic_haproxy_agent run);
+if [ ! -z $PID ]; then
+  echo "Already running!"
+  exit 1
+fi
+
+$(newrelic_haproxy_agent run > /dev/null)&
+PID=$(pidof /usr/bin/ruby2.1 /usr/local/bin/newrelic_haproxy_agent run);
+echo "Started newrelic haproxy agent ($PID)."
+echo $PID > /var/run/newrelic-haproxy.pid
+

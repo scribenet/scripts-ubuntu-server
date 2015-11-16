@@ -1,0 +1,97 @@
+#!/bin/bash
+
+REGEX="$1"
+FILES=()
+
+function checkUser() {
+    if [ "$EUID" -ne 0 ]; then
+        echo "ERROR"
+        echo "  Script must be run as root! (Try sudo)"
+        echo "  Exiting..."
+        exit
+    fi
+}
+
+function checkPassedValue() {
+    if [ -z "${REGEX}" ]; then
+        echo "You must provide a regex as the only argument."
+        exit 1
+    fi
+}
+
+function loadFiles() {
+    echo "SEARCHING"
+    echo "  Using the following parameters:"
+    echo "    Root Directory : $PWD"
+    echo "    Regex Search   : '^@.*?$REGEX.*?$'"
+
+    for file in $(ls -d @* | grep -oP "^@.*?$REGEX.*?$"); do
+        FILES+=("$PWD/$file");
+    done
+
+    if [ ${#FILES[@]} -lt 1 ]; then
+        echo ""
+        echo "ERROR"
+        echo "  No files found matching request."
+        echo "  Exiting..."
+        exit 1
+    fi
+}
+
+function performAction() {
+    echo ""
+    echo "PROCESSING"
+    echo "  Note         : This could take some time (depending on size/number of subvolumes."
+    echo "  Removing Vol :"
+    i=1
+    for file in ${FILES[@]}; do
+        echo -en "    - $(printf '%03d' $i)/$(printf '%03d' ${#FILES[@]}): Removing $file..."
+        btrfs subvolume delete "${file}" > /dev/null 2>&1
+        if [ "$?" -eq "0" ]; then
+            echo -en "done.\n"
+        else
+            echo -en "error!\n"
+        fi
+        i=$((($i+1)))
+    done
+    echo ""
+    echo "COMPLETE"
+    echo "  Removed all subvolumes matching request."
+    echo "EXIT"
+    echo "  Nothing left to do."
+    echo "  Exiting..."
+    exit 0
+}
+
+function doNotPerformAction() {
+    echo ""
+    echo "EXIT"
+    echo "  Per the user's request, not removing subvolumes."
+    echo "  Exiting..."
+    exit 0
+}
+
+function doAction() {
+    echo ""
+    echo "RESULT"
+    echo "  Found subvolumes : ${#FILES[@]}"
+    echo "  Listing items :"
+    i=1
+    for file in ${FILES[@]}; do
+        echo -en "    - $(printf '%03d' $i)/$(printf '%03d' ${#FILES[@]}): $file\n"
+        i=$((($i+1)))
+    done
+    echo ""
+    read -r -p "IMPORTANT: Are you sure you want to remove these subvolumes? [y/N] " response
+    response=${response,,}
+    if [[ $response =~ ^(yes|y)$ ]]; then
+        performAction;
+    else
+        doNotPerformAction;
+    fi
+}
+
+checkUser;
+checkPassedValue;
+loadFiles;
+doAction;

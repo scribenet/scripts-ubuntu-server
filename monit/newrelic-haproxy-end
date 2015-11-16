@@ -1,0 +1,12 @@
+#!/bin/bash
+PID=$(pidof /usr/local/rvm/gems/ruby-1.9.1-p431/bin/newrelic_haproxy_agent run);
+if [ -z $PID ]; then
+  echo "Not running!"
+  exit 1
+fi
+
+PID=$(pidof /usr/local/rvm/gems/ruby-1.9.1-p431/bin/newrelic_haproxy_agent run);
+kill ${PID}
+echo "Stopped newrelic haproxy agent ($PID)."
+echo "" > /var/run/newrelic-haproxy.pid
+

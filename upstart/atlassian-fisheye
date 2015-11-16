@@ -18,10 +18,25 @@ APP_NAME=fisheye
 RUN_AS_USER=atfisheye
 KILL_WAIT=30
 APP_HOME=/opt/atlassian/$APP_NAME
-SCRIPT_COMMON_PRE="bash -c"
+SCRIPT_COMMON_PRE="bash -l -c"
 SCRIPT_START="authbind --deep ${APP_HOME}/bin/fisheyectl.sh start"
 SCRIPT_STOP="${APP_HOME}/bin/fisheyectl.sh stop"
 SCRIPT_LOG="/dev/null"
+
+# Java options config
+JAVA_OPTS="-Djsse.enableSNIExtension=false $JAVA_OPTS"
+JAVA_OPTS="-Djava.net.preferIPv4Stack=true -Djavax.net.ssl.keyStore=/var/atlassian/application-data/keystore/star.scribe.software.keystore.jks -Djavax.net.ssl.keyStorePassword=fops2190 $JAVA_OPTS"
+export JAVA_OPTS
+
+# Java/JRE home directories
+JAVA_HOME=/usr/lib/jvm/java-8-oracle
+export JAVA_HOME
+JRE_HOME="/usr/lib/jvm/java-8-oracle/jre/"
+export JRE_HOME
+
+# Catalina config
+CATALINA_OPTS="-Djava.net.preferIPv4Stack=true -Djavax.net.ssl.keyStore=/var/atlassian/application-data/keystore/star.scribe.software.keystore.jks -Djavax.net.ssl.keyStorePassword=fops2190"
+export CATALINA_OPTS
 
 #
 # Output prefix
@@ -105,7 +120,7 @@ start() {
                 out_line_start "Starting..."
 
                 if [ "x$USER" != "x$RUN_AS_USER" ]; then
-                        su - $RUN_AS_USER -c "$SCRIPT_COMMON_PRE \"$SCRIPT_START\" > ${SCRIPT_LOG} 2>&1"
+                        su -l $RUN_AS_USER -c "$SCRIPT_COMMON_PRE \"$SCRIPT_START\" > ${SCRIPT_LOG} 2>&1"
                 else
                         $SCRIPT_COMMON_PRE "$SCRIPT_START" > ${SCRIPT_LOG} 2>&1
                 fi
